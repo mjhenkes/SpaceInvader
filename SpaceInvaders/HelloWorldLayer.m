@@ -13,6 +13,10 @@
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
 
+CCSprite *turret;
+CCSprite *invader;
+CCSprite *projectile;
+
 #pragma mark - HelloWorldLayer
 
 // HelloWorldLayer implementation
@@ -40,66 +44,24 @@
 	// always call "super" init
 	// Apple recommends to re-assign "self" with the "super's" return value
 	if( (self=[super init])) {
+        
+        CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
 		
-		// create and initialize a Label
-		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Hello World" fontName:@"Marker Felt" fontSize:64];
-
-		// ask director the the window size
-		CGSize size = [[CCDirector sharedDirector] winSize];
-	
-		// position the label on the center of the screen
-		label.position =  ccp( size.width /2 , size.height/2 );
-		
-		// add the label as a child to this Layer
-		[self addChild: label];
-		
-		
-		
-		//
-		// Leaderboards and Achievements
-		//
-		
-		// Default font size will be 28 points.
-		[CCMenuItemFont setFontSize:28];
-		
-		// Achievement Menu Item using blocks
-		CCMenuItem *itemAchievement = [CCMenuItemFont itemWithString:@"Achievements" block:^(id sender) {
-			
-			
-			GKAchievementViewController *achivementViewController = [[GKAchievementViewController alloc] init];
-			achivementViewController.achievementDelegate = self;
-			
-			AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-			
-			[[app navController] presentModalViewController:achivementViewController animated:YES];
-			
-			[achivementViewController release];
-		}
-									   ];
-
-		// Leaderboard Menu Item using blocks
-		CCMenuItem *itemLeaderboard = [CCMenuItemFont itemWithString:@"Leaderboard" block:^(id sender) {
-			
-			
-			GKLeaderboardViewController *leaderboardViewController = [[GKLeaderboardViewController alloc] init];
-			leaderboardViewController.leaderboardDelegate = self;
-			
-			AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-			
-			[[app navController] presentModalViewController:leaderboardViewController animated:YES];
-			
-			[leaderboardViewController release];
-		}
-									   ];
-		
-		CCMenu *menu = [CCMenu menuWithItems:itemAchievement, itemLeaderboard, nil];
-		
-		[menu alignItemsHorizontallyWithPadding:20];
-		[menu setPosition:ccp( size.width/2, size.height/2 - 50)];
-		
-		// Add the menu to the layer
-		[self addChild:menu];
-
+		turret = [[CCSprite alloc] initWithFile:@"turret.png"];
+        //[[CCDirector sharedDirector] winSize].width +32
+        [turret setPosition:CGPointMake(midX + 32, 50)];
+        [self addChild:turret];
+        
+        invader = [CCSprite spriteWithFile:@"invader.png"];
+        [invader setPosition:CGPointMake(midX, [[CCDirector sharedDirector] winSize].height -32)];
+        [self addChild:invader];
+        
+        projectile = [CCSprite spriteWithFile:@"projectile.png"];
+        [self addChild:projectile];
+        
+        [self schedule:@selector(nextFrame:)];
+        
+        self.isTouchEnabled = YES;
 	}
 	return self;
 }
@@ -128,4 +90,113 @@
 	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
 	[[app navController] dismissModalViewControllerAnimated:YES];
 }
+
+- (void) nextFrame:(ccTime)dt {
+    invader.position = ccp( invader.position.x + 100*dt, invader.position.y );
+    if (invader.position.x > [[CCDirector sharedDirector] winSize].width +32) {
+        invader.position = ccp( -32, invader.position.y );
+    }
+    
+    CGRect projectileRect = CGRectMake(
+                                   projectile.position.x - (projectile.contentSize.width/2), 
+                                   projectile.position.y - (projectile.contentSize.height/2), 
+                                   projectile.contentSize.width, 
+                                   projectile.contentSize.height);
+
+    CGRect invaderRect = CGRectMake(
+                                   invader.position.x - (invader.contentSize.width/2), 
+                                   invader.position.y - (invader.contentSize.height/2), 
+                                   invader.contentSize.width, 
+                                   invader.contentSize.height);
+
+    if (CGRectIntersectsRect(projectileRect, invaderRect)) 
+    {
+        [self removeChild:invader cleanup:YES];
+        [self unschedule:_cmd];
+    }
+}
+
+- (void) registerWithTouchDispatcher
+{
+    CCDirector *director = [CCDirector sharedDirector];
+	[[director touchDispatcher] addTargetedDelegate:self priority:0 swallowsTouches:YES];
+}
+                                         
+- (BOOL)ccTouchBegan:(UITouch *)touch withEvent:(UIEvent *)event
+{
+    //ccTime time = 1;
+    [self fireProjectile];
+    [self schedule:@selector(fireProjectile) interval:1];
+    
+    CGPoint location = [self convertTouchToNodeSpace:touch];
+    location.y = 50;
+    
+    [turret stopAllActions];
+    [turret runAction:[CCMoveTo actionWithDuration:1 position:location]];
+    
+    return YES;
+}
+
+- (void)fireProjectile
+{
+    //CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
+    
+    CGPoint turretPosition = [turret position];
+    
+    [projectile setPosition:turretPosition];
+    
+    
+    //[self addChild:projectile];
+    
+    CGPoint endPoint = CGPointMake(turretPosition.x, 1000);
+    
+    [projectile runAction:[CCMoveTo actionWithDuration:1 position:endPoint]];
+    //[projectile runAction:[CCSequence actions:
+    //                       [CCMoveTo actionWithDuration:1 position:endPoint],
+    //                       [CCCallFuncN actionWithTarget:self selector:@selector(spriteMoveFinished:)],
+    //                       nil]];
+}
+
+-(void)spriteMoveFinished:(id)sender {
+    CCSprite *sprite = (CCSprite *)sender;
+    //[self removeChild:sprite cleanup:YES];
+}
+
+- (void)ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event
+{
+    [self unschedule:@selector(fireProjectile)];
+//    CGPoint location = [self convertTouchToNodeSpace:touch];
+//    location.y = 50;
+//    
+//    [turret stopAllActions];
+//    [turret runAction:[CCMoveTo actionWithDuration:1 position:location]];
+}
+-(void) ccTouchCancelled:(UITouch *)touch withEvent:(UIEvent *)event
+{
+    
+}
+
+-(void) ccTouchMoved:(UITouch *)touch withEvent:(UIEvent *)event
+{
+//	CGPoint touchLocation = [touch locationInView: [touch view]];
+//	CGPoint prevLocation = [touch previousLocationInView: [touch view]];
+//    
+//	touchLocation = [[CCDirector sharedDirector] convertToGL: touchLocation];
+//	prevLocation = [[CCDirector sharedDirector] convertToGL: prevLocation];
+//    
+//	CGPoint diff = ccpSub(touchLocation,prevLocation);
+//    diff.y = 0;
+//    
+//	//CCNode *node = [self getChildByTag:kTagNode];
+//	CGPoint currentPos = [turret position];
+//	[turret setPosition: ccpAdd(currentPos, diff)];
+    
+    CGPoint location = [self convertTouchToNodeSpace:touch];
+    location.y = 50;
+    
+    [turret stopAllActions];
+    [turret runAction:[CCMoveTo actionWithDuration:1 position:location]];
+}
+                                         
+                                         
 @end
