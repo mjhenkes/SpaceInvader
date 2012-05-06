@@ -17,7 +17,14 @@
 {
 }
 
+// fires a missile projectile
 - (void)fireProjectile;
+
+// moves the missile projectile forward
+- (void)moveProjectile:(CCSprite *)projectile;
+
+// returns the correct projectile for the ship to fire
+- (CCSprite *)getNextProjectile;
 
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene;

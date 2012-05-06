@@ -48,7 +48,6 @@
 
 	// 2D projection
 	[director_ setProjection:kCCDirectorProjection2D];
-//	[director setProjection:kCCDirectorProjection3D];
 
 	// Enables High Res mode (Retina Display) on iPhone 4 and maintains low res on all other devices
 	if( ! [director_ enableRetinaDisplay:YES] )
@@ -58,8 +57,7 @@
 	navController_ = [[UINavigationController alloc] initWithRootViewController:director_];
 	navController_.navigationBarHidden = YES;
 
-	// set the Navigation Controller as the root view controller
-//	[window_ setRootViewController:rootViewController_];
+	// set the Navigation Controller as a subview
 	[window_ addSubview:navController_.view];
 
 	// make main window visible
