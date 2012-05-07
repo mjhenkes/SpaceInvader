@@ -30,7 +30,7 @@
 								 multiSampling:NO
 							   numberOfSamples:0];
 
-	director_ = (CCDirectorIOS*) [CCDirector sharedDirector];
+	director_ = (CCDirectorIOS*) [CCDirector sharedDirector]; //Here is where the director is setup
 
 	director_.wantsFullScreenLayout = YES;
 
@@ -78,7 +78,7 @@
 	[CCTexture2D PVRImagesHavePremultipliedAlpha:YES];
 
 	// and add the scene to the stack. The director will run it when it automatically when the view is displayed.
-	[director_ pushScene: [HelloWorldLayer scene]]; 
+	[director_ pushScene: [HelloWorldLayer scene]]; //Here is where we add the scene to the director.
 
 	return YES;
 }

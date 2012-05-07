@@ -29,6 +29,7 @@ int projectileIndex = 0;
 @implementation HelloWorldLayer
 
 // Helper class method that creates a Scene with the HelloWorldLayer as the only child.
+// Here is the scene it is automatially created by the template
 +(CCScene *) scene
 {
 	// 'scene' is an autorelease object.
@@ -53,15 +54,20 @@ int projectileIndex = 0;
         
         CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
 		
+        //Create sprites with file here
+        //sprites are global for convinence. Could 
 		turret = [[CCSprite alloc] initWithFile:@"turret.png"];
         //[[CCDirector sharedDirector] winSize].width +32
+        //set turret positon to middle of screen
         [turret setPosition:CGPointMake(midX + 32, 50)];
         [self addChild:turret];
         
+        //Build invaders
         invader = [CCSprite spriteWithFile:@"invader.png"];
         [invader setPosition:CGPointMake(midX, [[CCDirector sharedDirector] winSize].height -32)];
         [self addChild:invader];
         
+        //Create projectiles
         projectile1 = [CCSprite spriteWithFile:@"projectile.png"];
         [self addChild:projectile1];
         
@@ -76,6 +82,7 @@ int projectileIndex = 0;
         
         projectile5 = [CCSprite spriteWithFile:@"projectile.png"];
         [self addChild:projectile5];
+        
         
         [self schedule:@selector(nextFrame:)];
         
