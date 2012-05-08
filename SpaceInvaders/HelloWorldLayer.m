@@ -13,13 +13,9 @@
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
 
+NSMutableArray *allInvaders;
+NSMutableArray *allProjectiles;
 CCSprite *turret;
-CCSprite *invader;
-CCSprite *projectile1;
-CCSprite *projectile2;
-CCSprite *projectile3;
-CCSprite *projectile4;
-CCSprite *projectile5;
 int projectileIndex = 0;
 
 
@@ -62,26 +58,28 @@ int projectileIndex = 0;
         [turret setPosition:CGPointMake(midX + 32, 50)];
         [self addChild:turret];
         
-        //Build invaders
-        invader = [CCSprite spriteWithFile:@"invader.png"];
-        [invader setPosition:CGPointMake(midX, [[CCDirector sharedDirector] winSize].height -32)];
-        [self addChild:invader];
+        allInvaders = [[NSMutableArray alloc] init];
         
-        //Create projectiles
-        projectile1 = [CCSprite spriteWithFile:@"projectile.png"];
-        [self addChild:projectile1];
+        int xOffset = -144;
+        int invaderSpace = -10;
+        for (int i = 0; i < 5; i++)
+        {
+            CCSprite *invader = [CCSprite spriteWithFile:@"invader.png"];
+            [invader setPosition:CGPointMake(midX + xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32)];
+            [self addChild:invader];
+            [allInvaders addObject:invader];
+            xOffset += 72;
+            invaderSpace += 5;
+        }
         
-        projectile2 = [CCSprite spriteWithFile:@"projectile.png"];
-        [self addChild:projectile2];
+        allProjectiles = [[NSMutableArray alloc] init];
         
-        projectile3 = [CCSprite spriteWithFile:@"projectile.png"];
-        [self addChild:projectile3];
-        
-        projectile4 = [CCSprite spriteWithFile:@"projectile.png"];
-        [self addChild:projectile4];
-        
-        projectile5 = [CCSprite spriteWithFile:@"projectile.png"];
-        [self addChild:projectile5];
+        for (int i = 0; i < 5; i++)
+        {
+            CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
+            [self addChild:projectile];
+            [allProjectiles addObject:projectile];
+        }
         
         
         [self schedule:@selector(nextFrame:)];
@@ -119,21 +117,25 @@ int projectileIndex = 0;
 // Code to run for each frame executed
 - (void) nextFrame:(ccTime)dt 
 {
-    if (invader != nil)
+    for (int i = 0; i < 5; i++)
     {
-        // moves invader from left to right
-        invader.position = ccp( invader.position.x + 100*dt, invader.position.y );
-        if (invader.position.x > [[CCDirector sharedDirector] winSize].width +32) {
-            invader.position = ccp( -32, invader.position.y );
+        // move each invader on screen
+        CCSprite *invader = [allInvaders objectAtIndex:i];
+        if (invader != nil)
+        {
+            invader.position = ccp( invader.position.x + 100*dt, invader.position.y );
+            if (invader.position.x > [[CCDirector sharedDirector] winSize].width +32) 
+            {
+                invader.position = ccp( -32, invader.position.y );
+            }
         }
     }
     
     // move each projectile up if fired
-    [self moveProjectile:(projectile1)];
-    [self moveProjectile:(projectile2)];
-    [self moveProjectile:(projectile3)];
-    [self moveProjectile:(projectile4)];
-    [self moveProjectile:(projectile5)];
+    for (int i = 0; i < 5; i++)
+    {
+        [self moveProjectile:[allProjectiles objectAtIndex:i]];
+    }
 }
 
 // moves the projectile upwards and destroys the invader if rects intersect
@@ -150,20 +152,25 @@ int projectileIndex = 0;
                                        projectile.contentSize.width, 
                                        projectile.contentSize.height);
 
-    if (invader != nil)
+    for (int i = 0; i < 5; i++)
     {
-        CGRect invaderRect = CGRectMake(
-                                         invader.position.x - (invader.contentSize.width/2), 
-                                         invader.position.y - (invader.contentSize.height/2), 
-                                         invader.contentSize.width,
-                                         invader.contentSize.height);
+        CCSprite *invader = [allInvaders objectAtIndex:i];
         
-        // if the projectile and the invaders rect intersect, we have hit the invader and can remove it
-        if (CGRectIntersectsRect(projectileRect, invaderRect)) 
+        if (invader != nil)
         {
-            [self removeChild:invader cleanup:YES];
-            invader = nil;
-            [self unschedule:_cmd];
+            CGRect invaderRect = CGRectMake(
+                                            invader.position.x - (invader.contentSize.width/2), 
+                                            invader.position.y - (invader.contentSize.height/2), 
+                                            invader.contentSize.width,
+                                            invader.contentSize.height);
+            
+            // if the projectile and the invaders rect intersect, we have hit the invader and can remove it
+            if (CGRectIntersectsRect(projectileRect, invaderRect)) 
+            {
+                [self removeChild:invader cleanup:YES];
+                invader = nil;
+                [self unschedule:_cmd];
+            }
         }
     }
 }
@@ -171,31 +178,7 @@ int projectileIndex = 0;
 // will return the next projectile to fire for the ship
 - (CCSprite *)getNextProjectile
 {
-    CCSprite *projectile = nil;
-    if (projectileIndex == 0)
-    {
-        projectile = projectile1;
-    }
-
-    if (projectileIndex == 1)
-    {
-        projectile = projectile2;
-    }
-
-    if (projectileIndex == 2)
-    {
-        projectile = projectile3;
-    }
-    
-    if (projectileIndex == 3)
-    {
-        projectile = projectile4;
-    }
-    
-    if (projectileIndex == 4)
-    {
-        projectile = projectile5;
-    }
+    CCSprite *projectile = [allProjectiles objectAtIndex:projectileIndex];
     
     projectileIndex++;
     if (projectileIndex == 5)
