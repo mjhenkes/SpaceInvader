@@ -17,7 +17,10 @@ NSMutableArray *allInvaders;
 NSMutableArray *allProjectiles;
 CCSprite *turret;
 int projectileIndex = 0;
-
+int horizontalSpeed = 3;
+int verticalSpeed = 12;
+int numberOfInvaders = 10;
+int numberOfProjectiles = 5;
 
 #pragma mark - HelloWorldLayer
 
@@ -25,7 +28,7 @@ int projectileIndex = 0;
 @implementation HelloWorldLayer
 
 // Helper class method that creates a Scene with the HelloWorldLayer as the only child.
-+(CCScene *) scene
++ (CCScene *)scene
 {
 	// 'scene' is an autorelease object.
 	CCScene *scene = [CCScene node];
@@ -41,11 +44,11 @@ int projectileIndex = 0;
 }
 
 // on "init" you need to initialize your instance
--(id) init
+- (id)init
 {
 	// always call "super" init
 	// Apple recommends to re-assign "self" with the "super's" return value
-	if( (self=[super init])) {
+	if ((self=[super init])) {
         
         CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
 		
@@ -56,12 +59,13 @@ int projectileIndex = 0;
         
         allInvaders = [[NSMutableArray alloc] init];
         
-        int xOffset = -144;
-        int invaderSpace = -10;
-        for (int i = 0; i < 5; i++)
+        int xOffset = 0;
+        int invaderSpace = 0;
+        
+        for (int i = 0; i < numberOfInvaders; i++)
         {
-            CCSprite *invader = [CCSprite spriteWithFile:@"invader.png"];
-            [invader setPosition:CGPointMake(midX + xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32)];
+            InvaderSprite *invader = [InvaderSprite spriteWithFile:@"invader.png"];
+            [invader setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32)];
             [self addChild:invader];
             [allInvaders addObject:invader];
             xOffset += 72;
@@ -70,7 +74,7 @@ int projectileIndex = 0;
         
         allProjectiles = [[NSMutableArray alloc] init];
         
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < numberOfProjectiles; i++)
         {
             CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
             [self addChild:projectile];
@@ -85,7 +89,7 @@ int projectileIndex = 0;
 }
 
 // on "dealloc" you need to release all your retained objects
-- (void) dealloc
+- (void)dealloc
 {
 	// in case you have something to dealloc, do it in this method
 	// in this particular example nothing needs to be released.
@@ -97,44 +101,97 @@ int projectileIndex = 0;
 
 #pragma mark GameKit delegate
 
--(void) achievementViewControllerDidFinish:(GKAchievementViewController *)viewController
+- (void)achievementViewControllerDidFinish:(GKAchievementViewController *)viewController
 {
 	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
 	[[app navController] dismissModalViewControllerAnimated:YES];
 }
 
--(void) leaderboardViewControllerDidFinish:(GKLeaderboardViewController *)viewController
+- (void)leaderboardViewControllerDidFinish:(GKLeaderboardViewController *)viewController
 {
 	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
 	[[app navController] dismissModalViewControllerAnimated:YES];
 }
 
 // Code to run for each frame executed
-- (void) nextFrame:(ccTime)dt 
+- (void)nextFrame:(ccTime)dt 
 {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < numberOfInvaders; i++)
     {
         // move each invader on screen
-        CCSprite *invader = [allInvaders objectAtIndex:i];
-        if (invader != nil)
-        {
-            invader.position = ccp( invader.position.x + 100*dt, invader.position.y );
-            if (invader.position.x > [[CCDirector sharedDirector] winSize].width +32) 
-            {
-                invader.position = ccp( -32, invader.position.y );
-            }
-        }
+        [self moveInvader:[allInvaders objectAtIndex:i]];
     }
     
     // move each projectile up if fired
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < numberOfProjectiles; i++)
     {
-        [self moveProjectile:[allProjectiles objectAtIndex:i]];
+        [self checkCollision:[allProjectiles objectAtIndex:i]];
     }
 }
 
-// moves the projectile upwards and destroys the invader if rects intersect
-- (void)moveProjectile:(CCSprite *)projectile
+// Move the invader in the correct direction
+- (void)moveInvader:(InvaderSprite *)invader
+{
+    if (invader != nil)
+    {
+        int direction = [[invader movingDirection] intValue];
+        
+        if (direction == Right)
+        {
+            if (invader.position.x >= [[CCDirector sharedDirector] winSize].width - 36) 
+            {
+                // hit right side, move down
+                [invader nextDirection];
+                invader.position = ccp(invader.position.x, invader.position.y - verticalSpeed);
+            }
+            else 
+            {
+                // keep moving right
+                invader.position = ccp(invader.position.x + horizontalSpeed, invader.position.y);
+            }
+        }
+        else if (direction == Left)
+        {
+            if (invader.position.x <= 36) 
+            {
+                // hit left side, move down
+                [invader nextDirection];
+                invader.position = ccp(invader.position.x, invader.position.y - verticalSpeed);
+            }
+            else 
+            {
+                // keep moving left
+                invader.position = ccp(invader.position.x - horizontalSpeed, invader.position.y);
+            }
+        }
+        else // (direction == Down)
+        {
+            if ([invader downDistanceRemaining:verticalSpeed])
+            {
+                // keep moving down
+                invader.position = ccp(invader.position.x, invader.position.y - verticalSpeed);
+            }
+            else 
+            {
+                int nextDirection = [[invader nextDirection] intValue];
+                
+                if (nextDirection == Right)
+                {
+                    // move invader right
+                    invader.position = ccp(invader.position.x + horizontalSpeed, invader.position.y);
+                }
+                else 
+                {
+                    // move invader left
+                    invader.position = ccp(invader.position.x - horizontalSpeed, invader.position.y);
+                }
+            }
+        }
+    }
+}
+
+// checks to see if the projectile has hit any invaders
+- (void)checkCollision:(CCSprite *)projectile
 {
     if (projectile == nil)
     {
@@ -147,7 +204,7 @@ int projectileIndex = 0;
                                        projectile.contentSize.width, 
                                        projectile.contentSize.height);
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < numberOfInvaders; i++)
     {
         CCSprite *invader = [allInvaders objectAtIndex:i];
         
@@ -176,7 +233,7 @@ int projectileIndex = 0;
     CCSprite *projectile = [allProjectiles objectAtIndex:projectileIndex];
     
     projectileIndex++;
-    if (projectileIndex == 5)
+    if (projectileIndex == numberOfProjectiles)
     {
         projectileIndex = 0;
     }
@@ -184,8 +241,7 @@ int projectileIndex = 0;
     return projectile;
 }
 
-
-- (void) registerWithTouchDispatcher
+- (void)registerWithTouchDispatcher
 {
     CCDirector *director = [CCDirector sharedDirector];
 	[[director touchDispatcher] addTargetedDelegate:self priority:0 swallowsTouches:YES];
@@ -221,7 +277,7 @@ int projectileIndex = 0;
     [projectile runAction:[CCMoveTo actionWithDuration:1 position:endPoint]];
 }
 
--(void)spriteMoveFinished:(id)sender {
+- (void)spriteMoveFinished:(id)sender {
     CCSprite *sprite = (CCSprite *)sender;
     //[self removeChild:sprite cleanup:YES];
 }
@@ -235,12 +291,12 @@ int projectileIndex = 0;
 //    [turret stopAllActions];
 //    [turret runAction:[CCMoveTo actionWithDuration:1 position:location]];
 }
--(void) ccTouchCancelled:(UITouch *)touch withEvent:(UIEvent *)event
+-(void)ccTouchCancelled:(UITouch *)touch withEvent:(UIEvent *)event
 {
     
 }
 
--(void) ccTouchMoved:(UITouch *)touch withEvent:(UIEvent *)event
+-(void)ccTouchMoved:(UITouch *)touch withEvent:(UIEvent *)event
 {
 //	CGPoint touchLocation = [touch locationInView: [touch view]];
 //	CGPoint prevLocation = [touch previousLocationInView: [touch view]];

@@ -8,6 +8,7 @@
 
 
 #import <GameKit/GameKit.h>
+#import "InvaderSprite.h"
 
 // When you import this file, you import all the cocos2d classes
 #import "cocos2d.h"
@@ -20,13 +21,16 @@
 // fires a missile projectile
 - (void)fireProjectile;
 
-// moves the missile projectile forward
-- (void)moveProjectile:(CCSprite *)projectile;
+// checks to see if the projectile has hit any invaders
+- (void)checkCollision:(CCSprite *)projectile;
 
 // returns the correct projectile for the ship to fire
 - (CCSprite *)getNextProjectile;
 
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene;
+
+// moves the invader in the correct direction
+- (void)moveInvader:(InvaderSprite *)invader;
 
 @end
