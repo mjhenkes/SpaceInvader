@@ -132,6 +132,12 @@
 		66C0836A1523ED1B00BE22E1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 66C083691523ED1B00BE22E1 /* main.m */; };
 		66C0836D1523ED1B00BE22E1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 66C0836C1523ED1B00BE22E1 /* AppDelegate.m */; };
 		66C083701523ED1B00BE22E1 /* HelloWorldLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 66C0836F1523ED1B00BE22E1 /* HelloWorldLayer.m */; };
+		C3136D6B155EEE4A00663553 /* invader02_1.png in Resources */ = {isa = PBXBuildFile; fileRef = C3136D65155EEE4A00663553 /* invader02_1.png */; };
+		C3136D6C155EEE4A00663553 /* invader02_2.png in Resources */ = {isa = PBXBuildFile; fileRef = C3136D66155EEE4A00663553 /* invader02_2.png */; };
+		C3136D6D155EEE4A00663553 /* invaderPing1.png in Resources */ = {isa = PBXBuildFile; fileRef = C3136D67155EEE4A00663553 /* invaderPing1.png */; };
+		C3136D6E155EEE4A00663553 /* invaderPing2.png in Resources */ = {isa = PBXBuildFile; fileRef = C3136D68155EEE4A00663553 /* invaderPing2.png */; };
+		C3136D6F155EEE4A00663553 /* invaderVic1.png in Resources */ = {isa = PBXBuildFile; fileRef = C3136D69155EEE4A00663553 /* invaderVic1.png */; };
+		C3136D70155EEE4A00663553 /* invaderVic2.png in Resources */ = {isa = PBXBuildFile; fileRef = C3136D6A155EEE4A00663553 /* invaderVic2.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -394,6 +400,12 @@
 		66C0836C1523ED1B00BE22E1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		66C0836E1523ED1B00BE22E1 /* HelloWorldLayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelloWorldLayer.h; sourceTree = "<group>"; };
 		66C0836F1523ED1B00BE22E1 /* HelloWorldLayer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HelloWorldLayer.m; sourceTree = "<group>"; };
+		C3136D65155EEE4A00663553 /* invader02_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invader02_1.png; path = Resources/invader02_1.png; sourceTree = "<group>"; };
+		C3136D66155EEE4A00663553 /* invader02_2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invader02_2.png; path = Resources/invader02_2.png; sourceTree = "<group>"; };
+		C3136D67155EEE4A00663553 /* invaderPing1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invaderPing1.png; path = Resources/invaderPing1.png; sourceTree = "<group>"; };
+		C3136D68155EEE4A00663553 /* invaderPing2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invaderPing2.png; path = Resources/invaderPing2.png; sourceTree = "<group>"; };
+		C3136D69155EEE4A00663553 /* invaderVic1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invaderVic1.png; path = Resources/invaderVic1.png; sourceTree = "<group>"; };
+		C3136D6A155EEE4A00663553 /* invaderVic2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invaderVic2.png; path = Resources/invaderVic2.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -466,6 +478,12 @@
 		66C081FB1523ED1900BE22E1 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C3136D65155EEE4A00663553 /* invader02_1.png */,
+				C3136D66155EEE4A00663553 /* invader02_2.png */,
+				C3136D67155EEE4A00663553 /* invaderPing1.png */,
+				C3136D68155EEE4A00663553 /* invaderPing2.png */,
+				C3136D69155EEE4A00663553 /* invaderVic1.png */,
+				C3136D6A155EEE4A00663553 /* invaderVic2.png */,
 				662C33A51526AF66008D91DA /* invader.png */,
 				662C33A61526AF66008D91DA /* projectile.png */,
 				662C33A71526AF66008D91DA /* turret.png */,
@@ -891,6 +909,12 @@
 				662C33A81526AF66008D91DA /* invader.png in Resources */,
 				662C33A91526AF66008D91DA /* projectile.png in Resources */,
 				662C33AA1526AF66008D91DA /* turret.png in Resources */,
+				C3136D6B155EEE4A00663553 /* invader02_1.png in Resources */,
+				C3136D6C155EEE4A00663553 /* invader02_2.png in Resources */,
+				C3136D6D155EEE4A00663553 /* invaderPing1.png in Resources */,
+				C3136D6E155EEE4A00663553 /* invaderPing2.png in Resources */,
+				C3136D6F155EEE4A00663553 /* invaderVic1.png in Resources */,
+				C3136D70155EEE4A00663553 /* invaderVic2.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
