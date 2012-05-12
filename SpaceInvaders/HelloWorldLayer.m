@@ -75,10 +75,30 @@ int currentVerticalMoveDistance = 0;
         
         for (int i = 0; i < numberOfInvaders; i++)
         {
-            CCSprite *invader = [CCSprite spriteWithFile:@"invader.png"];
-            [invader setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32)];
-            [self addChild:invader];
-            [allInvaders addObject:invader];
+            NSMutableArray *invaderColumn = [[NSMutableArray alloc] init];
+            [allInvaders addObject:invaderColumn];
+            
+            int yOffset = 0;
+            
+            CCSprite *invader02 = [CCSprite spriteWithFile:@"invader02_1.png"];
+            [invader02 setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32 - yOffset)];
+            [self addChild:invader02];
+            [invaderColumn addObject:invader02];
+            
+            yOffset += 72;
+            
+            CCSprite *invaderVic = [CCSprite spriteWithFile:@"invaderVic1.png"];
+            [invaderVic setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32 - yOffset)];
+            [self addChild:invaderVic];
+            [invaderColumn addObject:invaderVic];
+            
+            yOffset += 72;
+            
+            CCSprite *invaderPing = [CCSprite spriteWithFile:@"invaderPing1.png"];
+            [invaderPing setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32 - yOffset)];
+            [self addChild:invaderPing];
+            [invaderColumn addObject:invaderPing];
+            
             xOffset += 72;
             invaderSpace += 5;
         }
@@ -130,10 +150,13 @@ int currentVerticalMoveDistance = 0;
 {
     [self determineNextInvaderDirection];
     
-    for (int i = 0; i < numberOfInvaders; i++)
+    for (int x = 0; x < numberOfInvaders; x++)
     {
-        // move each invader on screen
-        [self moveInvader:[allInvaders objectAtIndex:i]];
+        for (int y = 0; y < 3; y++)
+        {
+            // move each invader on screen
+            [self moveInvader:[[allInvaders objectAtIndex:x] objectAtIndex:y]];
+        }
     }
     
     // move each projectile up if fired
@@ -220,24 +243,28 @@ int currentVerticalMoveDistance = 0;
                                        projectile.contentSize.width, 
                                        projectile.contentSize.height);
 
-    for (int i = 0; i < numberOfInvaders; i++)
+    for (int x = 0; x < numberOfInvaders; x++)
     {
-        CCSprite *invader = [allInvaders objectAtIndex:i];
-        
-        if (invader != nil)
+        for (int y = 0; y < 3; y++)
         {
-            CGRect invaderRect = CGRectMake(
-                                            invader.position.x - (invader.contentSize.width/2), 
-                                            invader.position.y - (invader.contentSize.height/2), 
-                                            invader.contentSize.width,
-                                            invader.contentSize.height);
+            // move each invader on screen
+            CCSprite *invader = [[allInvaders objectAtIndex:x] objectAtIndex:y];
             
-            // if the projectile and the invaders rect intersect, we have hit the invader and can remove it
-            if (CGRectIntersectsRect(projectileRect, invaderRect)) 
+            if (invader != nil)
             {
-                [self removeChild:invader cleanup:YES];
-                invader = nil;
-                [self unschedule:_cmd];
+                CGRect invaderRect = CGRectMake(
+                                                invader.position.x - (invader.contentSize.width/2), 
+                                                invader.position.y - (invader.contentSize.height/2), 
+                                                invader.contentSize.width,
+                                                invader.contentSize.height);
+            
+                // if the projectile and the invaders rect intersect, we have hit the invader and can remove it
+                if (CGRectIntersectsRect(projectileRect, invaderRect)) 
+                {
+                    [self removeChild:invader cleanup:YES];
+                    invader = nil;
+                    [self unschedule:_cmd];
+                }
             }
         }
     }
