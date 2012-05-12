@@ -65,6 +65,28 @@ int currentVerticalMoveDistance = 0;
         [turret setPosition:CGPointMake(midX + 32, 50)];
         [self addChild:turret];
         
+        [[CCSpriteFrameCache sharedSpriteFrameCache] addSpriteFramesWithFile:@"invaderSpriteMap.plist"];
+        
+        NSMutableArray *invaderFrames = [NSMutableArray array];
+        NSMutableArray *pingFrames = [NSMutableArray array];
+        NSMutableArray *vicFrames = [NSMutableArray array];
+        
+        for (int i = 1; i <= 2; ++i)
+        {
+            NSString *invaderPath = [NSString stringWithFormat:@"invader02_%d.png", i];
+            
+            [invaderFrames addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+                                    spriteFrameByName:invaderPath]];
+            [pingFrames addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+                                    spriteFrameByName: [NSString stringWithFormat:@"invaderPing%d.png", i]]];
+            [vicFrames addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+                                    spriteFrameByName: [NSString stringWithFormat:@"invaderVic%d.png", i]]];
+        }
+        
+        CCAnimation *invaderAnim = [CCAnimation animationWithSpriteFrames:invaderFrames delay:1];
+        CCAnimation *pingAnim = [CCAnimation animationWithSpriteFrames:pingFrames delay:0.0333f];
+        CCAnimation *vicAnim = [CCAnimation animationWithSpriteFrames:vicFrames delay:0.0333f];
+        
         currentHorizontalMoveDistance = horizontalMoveDistance;
         currentVerticalMoveDistance = vertiicalMoveDistance;
         
@@ -75,8 +97,11 @@ int currentVerticalMoveDistance = 0;
         
         for (int i = 0; i < numberOfInvaders; i++)
         {
-            CCSprite *invader = [CCSprite spriteWithFile:@"invader.png"];
+            CCSprite *invader = [CCSprite spriteWithFile:@"invader02_1.png"];
             [invader setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32)];
+            [invader runAction:[CCRepeatForever actionWithAction: 
+                                [CCAnimate actionWithAnimation:invaderAnim]]];
+            
             [self addChild:invader];
             [allInvaders addObject:invader];
             xOffset += 72;

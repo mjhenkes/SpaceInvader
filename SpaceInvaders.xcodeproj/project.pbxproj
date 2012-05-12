@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		32B6BE9E155EF91E00FC6854 /* invaderSpriteMap.png in Resources */ = {isa = PBXBuildFile; fileRef = 32B6BE9D155EF91E00FC6854 /* invaderSpriteMap.png */; };
+		32B6BEA1155EFAF000FC6854 /* invaderSpriteMap.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32B6BEA0155EFAEF00FC6854 /* invaderSpriteMap.plist */; };
 		662C33A81526AF66008D91DA /* invader.png in Resources */ = {isa = PBXBuildFile; fileRef = 662C33A51526AF66008D91DA /* invader.png */; };
 		662C33A91526AF66008D91DA /* projectile.png in Resources */ = {isa = PBXBuildFile; fileRef = 662C33A61526AF66008D91DA /* projectile.png */; };
 		662C33AA1526AF66008D91DA /* turret.png in Resources */ = {isa = PBXBuildFile; fileRef = 662C33A71526AF66008D91DA /* turret.png */; };
@@ -141,6 +143,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		32B6BE9D155EF91E00FC6854 /* invaderSpriteMap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invaderSpriteMap.png; path = Resources/invaderSpriteMap.png; sourceTree = "<group>"; };
+		32B6BEA0155EFAEF00FC6854 /* invaderSpriteMap.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = invaderSpriteMap.plist; path = Resources/invaderSpriteMap.plist; sourceTree = "<group>"; };
 		662C33A51526AF66008D91DA /* invader.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invader.png; path = Resources/invader.png; sourceTree = "<group>"; };
 		662C33A61526AF66008D91DA /* projectile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = projectile.png; path = Resources/projectile.png; sourceTree = "<group>"; };
 		662C33A71526AF66008D91DA /* turret.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = turret.png; path = Resources/turret.png; sourceTree = "<group>"; };
@@ -478,6 +482,8 @@
 		66C081FB1523ED1900BE22E1 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				32B6BEA0155EFAEF00FC6854 /* invaderSpriteMap.plist */,
+				32B6BE9D155EF91E00FC6854 /* invaderSpriteMap.png */,
 				C3136D65155EEE4A00663553 /* invader02_1.png */,
 				C3136D66155EEE4A00663553 /* invader02_2.png */,
 				C3136D67155EEE4A00663553 /* invaderPing1.png */,
@@ -915,6 +921,8 @@
 				C3136D6E155EEE4A00663553 /* invaderPing2.png in Resources */,
 				C3136D6F155EEE4A00663553 /* invaderVic1.png in Resources */,
 				C3136D70155EEE4A00663553 /* invaderVic2.png in Resources */,
+				32B6BE9E155EF91E00FC6854 /* invaderSpriteMap.png in Resources */,
+				32B6BEA1155EFAF000FC6854 /* invaderSpriteMap.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
