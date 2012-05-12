@@ -25,7 +25,7 @@ int verticalSpeed = 12;
 int numberOfInvaders = 7;
 int numberOfProjectiles = 2;
 int numberOfEnemyProjectiles = 100;
-CGFloat enemyFireProbability = 0.00005;
+CGFloat enemyFireProbability = 0.02;
 int currentDirection = Right;
 int previousDirection = Right;
 int horizontalMoveDistance = 420;
@@ -213,22 +213,22 @@ int currentVerticalMoveDistance = 0;
         for (int y = 0; y < [[allInvaders objectAtIndex:x] count]; y++) 
         {
             // move each invader on screen
-            [self moveInvader:[[allInvaders objectAtIndex:x] objectAtIndex:y]];
-            
-            for (CCSprite *bottomInvader in [self frontlineInvaders]) 
-            {
-                int random = rand() % 100;
-                                
-                CGFloat fireCalculations = (float)random / 100;
-                                                        
-                if (fireCalculations < enemyFireProbability)
-                {                    
-                    [self fireEnemyProjectileFromInvader:bottomInvader];
-                }
-            }
-            
-            // Determine if invader should fire here.
+            [self moveInvader:[[allInvaders objectAtIndex:x] objectAtIndex:y]];                        
         }        
+    }
+    
+    for (CCSprite *bottomInvader in [self frontlineInvaders]) 
+    {
+        int random = rand() % 100;
+        
+        CGFloat fireCalculations = random;
+        
+        CGFloat difference = fireCalculations - (enemyFireProbability * 100);
+        
+        if (difference < 0)
+        {                    
+            [self fireEnemyProjectileFromInvader:bottomInvader];
+        }
     }
     
     // move each projectile up if fired
