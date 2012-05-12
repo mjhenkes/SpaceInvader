@@ -24,8 +24,8 @@ int horizontalSpeed = 3;
 int verticalSpeed = 12;
 int numberOfInvaders = 7;
 int numberOfProjectiles = 2;
-int numberOfEnemyProjectiles = 50;
-float enemyFireProbability = 0.05;
+int numberOfEnemyProjectiles = 100;
+CGFloat enemyFireProbability = 0.00005;
 int currentDirection = Right;
 int previousDirection = Right;
 int horizontalMoveDistance = 420;
@@ -217,12 +217,12 @@ int currentVerticalMoveDistance = 0;
             
             for (CCSprite *bottomInvader in [self frontlineInvaders]) 
             {
-                float fireCalculations = ((float)(rand() % 100) / 100);
+                int random = rand() % 100;
                                 
-                BOOL willFire = fireCalculations <= enemyFireProbability;
-                
-                if (willFire)
-                {
+                CGFloat fireCalculations = (float)random / 100;
+                                                        
+                if (fireCalculations < enemyFireProbability)
+                {                    
                     [self fireEnemyProjectileFromInvader:bottomInvader];
                 }
             }
@@ -461,7 +461,7 @@ int currentVerticalMoveDistance = 0;
     
     [projectile setPosition:invaderPosition];
     
-    CGPoint endPoint = CGPointMake(invaderPosition.x, 0);
+    CGPoint endPoint = CGPointMake(invaderPosition.x, -5);
     
     [projectile runAction:[CCMoveTo actionWithDuration:1 position:endPoint]];
 }
