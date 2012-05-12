@@ -371,6 +371,9 @@ int currentVerticalMoveDistance = 0;
                     [[allInvaders objectAtIndex:x] removeObject:invader];
                     
                     invader = nil;
+                    
+                    [self removeChild:projectile cleanup:YES];
+                    projectile.position = CGPointMake(-1, -1);
                 }
             }
         }
@@ -388,6 +391,11 @@ int currentVerticalMoveDistance = 0;
         projectileIndex = 0;
     }
     
+    if (![[self children] containsObject:projectile]) 
+    {
+        [self addChild:projectile];
+    }
+        
     return projectile;
 }
 
@@ -463,7 +471,7 @@ int currentVerticalMoveDistance = 0;
     
     CGPoint endPoint = CGPointMake(invaderPosition.x, -5);
     
-    [projectile runAction:[CCMoveTo actionWithDuration:1 position:endPoint]];
+    [projectile runAction:[CCMoveTo actionWithDuration:2 position:endPoint]];
 }
 
 - (void)spriteMoveFinished:(id)sender 
