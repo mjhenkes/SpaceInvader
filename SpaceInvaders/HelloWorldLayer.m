@@ -19,8 +19,14 @@ CCSprite *turret;
 int projectileIndex = 0;
 int horizontalSpeed = 3;
 int verticalSpeed = 12;
-int numberOfInvaders = 10;
-int numberOfProjectiles = 5;
+int numberOfInvaders = 7;
+int numberOfProjectiles = 2;
+int currentDirection = Right;
+int previousDirection = Right;
+int horizontalMoveDistance = 420;
+int vertiicalMoveDistance = 36;
+int currentHorizontalMoveDistance = 0;
+int currentVerticalMoveDistance = 0;
 
 #pragma mark - HelloWorldLayer
 
@@ -53,18 +59,20 @@ int numberOfProjectiles = 5;
         CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
 		
 		turret = [[CCSprite alloc] initWithFile:@"turret.png"];
-        //[[CCDirector sharedDirector] winSize].width +32
         [turret setPosition:CGPointMake(midX + 32, 50)];
         [self addChild:turret];
         
+        currentHorizontalMoveDistance = horizontalMoveDistance;
+        currentVerticalMoveDistance = vertiicalMoveDistance;
+        
         allInvaders = [[NSMutableArray alloc] init];
         
-        int xOffset = 0;
+        int xOffset = 72;
         int invaderSpace = 0;
         
         for (int i = 0; i < numberOfInvaders; i++)
         {
-            InvaderSprite *invader = [InvaderSprite spriteWithFile:@"invader.png"];
+            CCSprite *invader = [CCSprite spriteWithFile:@"invader.png"];
             [invader setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32)];
             [self addChild:invader];
             [allInvaders addObject:invader];
@@ -116,6 +124,8 @@ int numberOfProjectiles = 5;
 // Code to run for each frame executed
 - (void)nextFrame:(ccTime)dt 
 {
+    [self determineNextInvaderDirection];
+    
     for (int i = 0; i < numberOfInvaders; i++)
     {
         // move each invader on screen
@@ -129,63 +139,65 @@ int numberOfProjectiles = 5;
     }
 }
 
+// determines the next direction for the invaders to move
+- (void)determineNextInvaderDirection
+{
+    if (currentDirection == Right || currentDirection == Left)
+    {
+        if (currentHorizontalMoveDistance <= 0)
+        {
+            currentHorizontalMoveDistance = horizontalMoveDistance;
+            previousDirection = currentDirection;
+            currentDirection = Down;
+        }
+        else 
+        {
+            currentHorizontalMoveDistance -= horizontalSpeed;
+        }
+    }
+    else // (currentDirection == Down)
+    {
+        if (currentVerticalMoveDistance <= 0)
+        {
+            currentVerticalMoveDistance = vertiicalMoveDistance;
+            
+            if (previousDirection == Right)
+            {
+                previousDirection = currentDirection;
+                currentDirection = Left;
+            }
+            else 
+            {
+                previousDirection = currentDirection;
+                currentDirection = Right;
+            }
+        }
+        else 
+        {
+            currentVerticalMoveDistance -= verticalSpeed;
+        }
+    } 
+}
+
 // Move the invader in the correct direction
-- (void)moveInvader:(InvaderSprite *)invader
+- (void)moveInvader:(CCSprite *)invader
 {
     if (invader != nil)
     {
-        int direction = [[invader movingDirection] intValue];
-        
-        if (direction == Right)
+        if (currentDirection == Right)
         {
-            if (invader.position.x >= [[CCDirector sharedDirector] winSize].width - 36) 
-            {
-                // hit right side, move down
-                [invader nextDirection];
-                invader.position = ccp(invader.position.x, invader.position.y - verticalSpeed);
-            }
-            else 
-            {
-                // keep moving right
-                invader.position = ccp(invader.position.x + horizontalSpeed, invader.position.y);
-            }
+            // keep moving right
+            invader.position = ccp(invader.position.x + horizontalSpeed, invader.position.y);
         }
-        else if (direction == Left)
+        else if (currentDirection == Left)
         {
-            if (invader.position.x <= 36) 
-            {
-                // hit left side, move down
-                [invader nextDirection];
-                invader.position = ccp(invader.position.x, invader.position.y - verticalSpeed);
-            }
-            else 
-            {
-                // keep moving left
-                invader.position = ccp(invader.position.x - horizontalSpeed, invader.position.y);
-            }
+            // keep moving left
+            invader.position = ccp(invader.position.x - horizontalSpeed, invader.position.y);
         }
         else // (direction == Down)
         {
-            if ([invader downDistanceRemaining:verticalSpeed])
-            {
-                // keep moving down
-                invader.position = ccp(invader.position.x, invader.position.y - verticalSpeed);
-            }
-            else 
-            {
-                int nextDirection = [[invader nextDirection] intValue];
-                
-                if (nextDirection == Right)
-                {
-                    // move invader right
-                    invader.position = ccp(invader.position.x + horizontalSpeed, invader.position.y);
-                }
-                else 
-                {
-                    // move invader left
-                    invader.position = ccp(invader.position.x - horizontalSpeed, invader.position.y);
-                }
-            }
+            // keep moving down
+            invader.position = ccp(invader.position.x, invader.position.y - verticalSpeed);
         }
     }
 }
@@ -270,6 +282,11 @@ int numberOfProjectiles = 5;
     
     CCSprite *projectile = [self getNextProjectile];
     
+    if ([projectile numberOfRunningActions] > 0)
+    {
+        return;
+    }
+    
     [projectile setPosition:turretPosition];
 
     CGPoint endPoint = CGPointMake(turretPosition.x, 1000);
@@ -277,9 +294,8 @@ int numberOfProjectiles = 5;
     [projectile runAction:[CCMoveTo actionWithDuration:1 position:endPoint]];
 }
 
-- (void)spriteMoveFinished:(id)sender {
-    CCSprite *sprite = (CCSprite *)sender;
-    //[self removeChild:sprite cleanup:YES];
+- (void)spriteMoveFinished:(id)sender 
+{
 }
 
 - (void)ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event

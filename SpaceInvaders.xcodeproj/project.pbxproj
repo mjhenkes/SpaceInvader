@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3270576B1559FA4C004C7D60 /* InvaderSprite.m in Sources */ = {isa = PBXBuildFile; fileRef = 3270576A1559FA4C004C7D60 /* InvaderSprite.m */; };
 		662C33A81526AF66008D91DA /* invader.png in Resources */ = {isa = PBXBuildFile; fileRef = 662C33A51526AF66008D91DA /* invader.png */; };
 		662C33A91526AF66008D91DA /* projectile.png in Resources */ = {isa = PBXBuildFile; fileRef = 662C33A61526AF66008D91DA /* projectile.png */; };
 		662C33AA1526AF66008D91DA /* turret.png in Resources */ = {isa = PBXBuildFile; fileRef = 662C33A71526AF66008D91DA /* turret.png */; };
@@ -136,8 +135,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		327057691559FA4C004C7D60 /* InvaderSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InvaderSprite.h; sourceTree = "<group>"; };
-		3270576A1559FA4C004C7D60 /* InvaderSprite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InvaderSprite.m; sourceTree = "<group>"; };
 		662C33A51526AF66008D91DA /* invader.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invader.png; path = Resources/invader.png; sourceTree = "<group>"; };
 		662C33A61526AF66008D91DA /* projectile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = projectile.png; path = Resources/projectile.png; sourceTree = "<group>"; };
 		662C33A71526AF66008D91DA /* turret.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = turret.png; path = Resources/turret.png; sourceTree = "<group>"; };
@@ -455,8 +452,6 @@
 		66C081FA1523ED1900BE22E1 /* SpaceInvaders */ = {
 			isa = PBXGroup;
 			children = (
-				327057691559FA4C004C7D60 /* InvaderSprite.h */,
-				3270576A1559FA4C004C7D60 /* InvaderSprite.m */,
 				66C0836B1523ED1B00BE22E1 /* AppDelegate.h */,
 				66C0836C1523ED1B00BE22E1 /* AppDelegate.m */,
 				66C0836E1523ED1B00BE22E1 /* HelloWorldLayer.h */,
@@ -1007,7 +1002,6 @@
 				66C0836A1523ED1B00BE22E1 /* main.m in Sources */,
 				66C0836D1523ED1B00BE22E1 /* AppDelegate.m in Sources */,
 				66C083701523ED1B00BE22E1 /* HelloWorldLayer.m in Sources */,
-				3270576B1559FA4C004C7D60 /* InvaderSprite.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

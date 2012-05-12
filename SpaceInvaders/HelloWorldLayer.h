@@ -8,10 +8,16 @@
 
 
 #import <GameKit/GameKit.h>
-#import "InvaderSprite.h"
 
 // When you import this file, you import all the cocos2d classes
 #import "cocos2d.h"
+
+typedef enum 
+{
+    Right,
+    Down,
+    Left
+} MovingDirections;
 
 // HelloWorldLayer
 @interface HelloWorldLayer : CCLayer <GKAchievementViewControllerDelegate, GKLeaderboardViewControllerDelegate>
@@ -31,6 +37,9 @@
 +(CCScene *) scene;
 
 // moves the invader in the correct direction
-- (void)moveInvader:(InvaderSprite *)invader;
+- (void)moveInvader:(CCSprite *)invader;
+
+// determines the next direction to move the invaders
+- (void)determineNextInvaderDirection;
 
 @end
