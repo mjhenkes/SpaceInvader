@@ -25,7 +25,7 @@ int verticalSpeed = 12;
 int numberOfInvaders = 7;
 int numberOfProjectiles = 2;
 int numberOfEnemyProjectiles = 50;
-float enemyFireProbability = 0.1;
+float enemyFireProbability = 0.05;
 int currentDirection = Right;
 int previousDirection = Right;
 int horizontalMoveDistance = 420;
@@ -217,7 +217,9 @@ int currentVerticalMoveDistance = 0;
             
             for (CCSprite *bottomInvader in [self frontlineInvaders]) 
             {
-                BOOL willFire = ((float)(rand() % 100) / 100) <= enemyFireProbability;
+                float fireCalculations = ((float)(rand() % 100) / 100);
+                                
+                BOOL willFire = fireCalculations <= enemyFireProbability;
                 
                 if (willFire)
                 {
