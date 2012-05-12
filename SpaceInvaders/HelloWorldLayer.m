@@ -266,15 +266,17 @@ int currentVerticalMoveDistance = 0;
 // when the user taps the screen, fire a missile and move the ship the correct direction
 - (BOOL)ccTouchBegan:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    CGRect shipRect = CGRectMake(turret.position.x - turret.contentSize.width / 2 - 60, turret.position.y - turret.contentSize.height / 2 - 30, turret.contentSize.width + 120, turret.contentSize.height + 60);
+    
+    CGPoint touchPoint = [self convertTouchToNodeSpace:touch];
+    
+    if (CGRectContainsPoint(shipRect, touchPoint)) 
+    {
+        [self fireProjectile];
+        [self schedule:@selector(fireProjectile) interval:1];
+    }
+    
     //ccTime time = 1;
-    [self fireProjectile];
-    [self schedule:@selector(fireProjectile) interval:1];
-    
-    CGPoint location = [self convertTouchToNodeSpace:touch];
-    location.y = 50;
-    
-    [turret stopAllActions];
-    [turret runAction:[CCMoveTo actionWithDuration:1 position:location]];
     
     return YES;
 }
@@ -318,24 +320,10 @@ int currentVerticalMoveDistance = 0;
 
 -(void)ccTouchMoved:(UITouch *)touch withEvent:(UIEvent *)event
 {
-//	CGPoint touchLocation = [touch locationInView: [touch view]];
-//	CGPoint prevLocation = [touch previousLocationInView: [touch view]];
-//    
-//	touchLocation = [[CCDirector sharedDirector] convertToGL: touchLocation];
-//	prevLocation = [[CCDirector sharedDirector] convertToGL: prevLocation];
-//    
-//	CGPoint diff = ccpSub(touchLocation,prevLocation);
-//    diff.y = 0;
-//    
-//	//CCNode *node = [self getChildByTag:kTagNode];
-//	CGPoint currentPos = [turret position];
-//	[turret setPosition: ccpAdd(currentPos, diff)];
-    
     CGPoint location = [self convertTouchToNodeSpace:touch];
     location.y = 50;
     
-    [turret stopAllActions];
-    [turret runAction:[CCMoveTo actionWithDuration:1 position:location]];
+    turret.position = location;        
 }
                                          
                                          
