@@ -316,7 +316,7 @@ int currentVerticalMoveDistance = 0;
 
 - (void)checkShipCollision
 {
-    NSMutableArray *collideableObjects = [[NSMutableArray alloc] init];// = [NSMutableArray arrayWithArray:allEnemyProjectiles];
+    NSMutableArray *collideableObjects = [NSMutableArray arrayWithArray:allEnemyProjectiles];
     [collideableObjects addObjectsFromArray:[self frontlineInvaders]];
     
     for (int i = 0; i < [collideableObjects count]; i++)
