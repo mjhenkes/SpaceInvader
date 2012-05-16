@@ -27,9 +27,6 @@ typedef enum
 // fires a missile projectile
 - (void)fireProjectile;
 
-// checks to see if the projectile has hit any invaders
-- (void)checkCollision:(CCSprite *)projectile;
-
 // returns the correct projectile for the ship to fire
 - (CCSprite *)getNextProjectile;
 

@@ -13,7 +13,7 @@
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
 
-NSMutableArray *allInvaders;
+NSMutableArray *allInvaderColumns;
 NSMutableArray *allProjectiles;
 NSMutableArray *allEnemyProjectiles;
 
@@ -22,7 +22,7 @@ int projectileIndex = 0;
 int enemyProjectileIndex = 0;
 int horizontalSpeed = 3;
 int verticalSpeed = 12;
-int numberOfInvaders = 7;
+int numberOfInvaderColumns = 7;
 int numberOfProjectiles = 2;
 int numberOfEnemyProjectiles = 100;
 CGFloat enemyFireProbability = 0.02;
@@ -97,16 +97,16 @@ int currentVerticalMoveDistance = 0;
         currentHorizontalMoveDistance = horizontalMoveDistance;
         currentVerticalMoveDistance = vertiicalMoveDistance;
         
-        allInvaders = [[NSMutableArray alloc] init];
+        allInvaderColumns = [[NSMutableArray alloc] init];
         
         int xOffset = 72;
         int invaderSpace = 0;
         
-        for (int i = 0; i < numberOfInvaders; i++)
+        for (int i = 0; i < numberOfInvaderColumns; i++)
         {
             NSMutableArray *invaderColumn = [[NSMutableArray alloc] init];
-            [allInvaders addObject:invaderColumn];
-            
+            [allInvaderColumns addObject:invaderColumn];
+    
             int yOffset = 0;
             
             CCSprite *invader02 = [CCSprite spriteWithFile:@"invader02_1.png"];
@@ -192,11 +192,11 @@ int currentVerticalMoveDistance = 0;
 {
     NSMutableArray *frontline = [[NSMutableArray alloc] init];
     
-    for (int i = 0; i < [allInvaders count]; i++) 
+    for (int i = 0; i < [allInvaderColumns count]; i++) 
     {
-        if ([[allInvaders objectAtIndex:i] count] > 0) 
+        if ([[allInvaderColumns objectAtIndex:i] count] > 0) 
         {
-            [frontline addObject:[[allInvaders objectAtIndex:i] lastObject]];
+            [frontline addObject:[[allInvaderColumns objectAtIndex:i] lastObject]];
         }        
     }
     
@@ -208,12 +208,12 @@ int currentVerticalMoveDistance = 0;
 {
     [self determineNextInvaderDirection];
     
-    for (int x = 0; x < [allInvaders count]; x++)
+    for (int x = 0; x < [allInvaderColumns count]; x++)
     {
-        for (int y = 0; y < [[allInvaders objectAtIndex:x] count]; y++) 
+        for (int y = 0; y < [[allInvaderColumns objectAtIndex:x] count]; y++) 
         {
             // move each invader on screen
-            [self moveInvader:[[allInvaders objectAtIndex:x] objectAtIndex:y]];                        
+            [self moveInvader:[[allInvaderColumns objectAtIndex:x] objectAtIndex:y]];                        
         }        
     }
     
@@ -231,17 +231,10 @@ int currentVerticalMoveDistance = 0;
         }
     }
     
-    // move each projectile up if fired
-    for (int i = 0; i < numberOfProjectiles; i++)
-    {
-        [self checkInvaderCollision:[allProjectiles objectAtIndex:i]];
-    }
+    [self checkInvaderCollision];
     
-    // move each projectile up if fired
-    for (int i = 0; i < numberOfEnemyProjectiles; i++)
-    {
-        [self checkShipCollision:[allEnemyProjectiles objectAtIndex:i]];
-    }
+    [self checkShipCollision];
+ 
 
 }
 
@@ -308,72 +301,65 @@ int currentVerticalMoveDistance = 0;
     }
 }
 
-- (void)checkShipCollision:(CCSprite *)projectile
+- (BOOL)checkCollisionOfSprite:(CCSprite *)sprite1 withSprite:(CCSprite *)sprite2
 {
-    if (projectile == nil)
+    BOOL collide = NO;
+    if (sprite1 && sprite2)
     {
-        return;
+        if (CGRectIntersectsRect([sprite1 boundingBox], [sprite2 boundingBox])) {
+            collide = YES;
+        }
     }
     
-    CGRect projectileRect = CGRectMake(
-                                       projectile.position.x - (projectile.contentSize.width/2), 
-                                       projectile.position.y - (projectile.contentSize.height/2), 
-                                       projectile.contentSize.width, 
-                                       projectile.contentSize.height);
+    return collide;
+}
+
+- (void)checkShipCollision
+{
+    NSMutableArray *collideableObjects = [[NSMutableArray alloc] init];// = [NSMutableArray arrayWithArray:allEnemyProjectiles];
+    [collideableObjects addObjectsFromArray:[self frontlineInvaders]];
     
-    CGRect shipRect = CGRectMake(turret.position.x - turret.contentSize.width / 2, turret.position.y - turret.contentSize.height / 2, turret.contentSize.width, turret.contentSize.height);
-    
-    if (CGRectIntersectsRect(projectileRect, shipRect)) 
+    for (int i = 0; i < [collideableObjects count]; i++)
     {
-        [self removeChild:turret cleanup:YES];
-        turret = nil;
-        [self unschedule:_cmd];
+        if ([self checkCollisionOfSprite:[collideableObjects objectAtIndex:i] withSprite:turret]) 
+        {
+            [self removeChild:turret cleanup:YES];
+            turret = nil;
+            [self unschedule:_cmd];
         
-        // Trigger game over
+            // Trigger game over
+        }
     }
 }
 
 // checks to see if the projectile has hit any invaders
-- (void)checkInvaderCollision:(CCSprite *)projectile
+- (void)checkInvaderCollision
 {
-    if (projectile == nil)
+    for (int i = 0; i < numberOfProjectiles; i++)
     {
-        return;
-    }
-
-    CGRect projectileRect = CGRectMake(
-                                       projectile.position.x - (projectile.contentSize.width/2), 
-                                       projectile.position.y - (projectile.contentSize.height/2), 
-                                       projectile.contentSize.width, 
-                                       projectile.contentSize.height);
-
-    for (int x = 0; x < [allInvaders count]; x++)
-    {
-        for (int y = 0; y < [[allInvaders objectAtIndex:x] count]; y++)
+        CCSprite *projectile = [allProjectiles objectAtIndex:i];
+        
+        for (int x = 0; x < [allInvaderColumns count]; x++)
         {
-            // move each invader on screen
-            CCSprite *invader = [[allInvaders objectAtIndex:x] objectAtIndex:y];
-            
-            if (invader != nil)
+            for (int y = 0; y < [[allInvaderColumns objectAtIndex:x] count]; y++)
             {
-                CGRect invaderRect = CGRectMake(
-                                                invader.position.x - (invader.contentSize.width/2), 
-                                                invader.position.y - (invader.contentSize.height/2), 
-                                                invader.contentSize.width,
-                                                invader.contentSize.height);
+                CCSprite *invader = [[allInvaderColumns objectAtIndex:x] objectAtIndex:y];
             
-                // if the projectile and the invaders rect intersect, we have hit the invader and can remove it
-                if (CGRectIntersectsRect(projectileRect, invaderRect)) 
+                if (invader)
                 {
-                    [self removeChild:invader cleanup:YES];
-                    [self unschedule:_cmd];
+                    // if the projectile and the invaders rect intersect, we have hit the invader and can remove it
+                    if ([self checkCollisionOfSprite:projectile withSprite:invader]) 
+                    {
+                        [self removeChild:invader cleanup:YES];
+                        [self unschedule:_cmd];
                     
-                    [[allInvaders objectAtIndex:x] removeObject:invader];
+                        [[allInvaderColumns objectAtIndex:x] removeObject:invader];
                     
-                    invader = nil;
+                        invader = nil;
                     
-                    [self removeChild:projectile cleanup:YES];
-                    projectile.position = CGPointMake(-1, -1);
+                        [self removeChild:projectile cleanup:YES];
+                        projectile.position = CGPointMake(-1, -1);
+                    }
                 }
             }
         }
@@ -422,7 +408,13 @@ int currentVerticalMoveDistance = 0;
 // when the user taps the screen, fire a missile and move the ship the correct direction
 - (BOOL)ccTouchBegan:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    CGRect shipRect = CGRectMake(turret.position.x - turret.contentSize.width / 2 - 60, turret.position.y - turret.contentSize.height / 2 - 30, turret.contentSize.width + 120, turret.contentSize.height + 60);
+    CGRect shipRect = [turret boundingBox];
+    //Inflate rect
+    shipRect.size.width += 120;
+    shipRect.size.height += 60;
+    shipRect.origin.x -= 60;
+    shipRect.origin.y -= 120;
+    
     
     CGPoint touchPoint = [self convertTouchToNodeSpace:touch];
     
@@ -451,9 +443,9 @@ int currentVerticalMoveDistance = 0;
     
     [projectile setPosition:turretPosition];
 
-    CGPoint endPoint = CGPointMake(turretPosition.x, 1000);
+    CGPoint endPoint = CGPointMake(turretPosition.x, turretPosition.y + [[CCDirector sharedDirector] winSize].height);
     
-    [projectile runAction:[CCMoveTo actionWithDuration:1 position:endPoint]];
+    [projectile runAction:[CCMoveTo actionWithDuration:2 position:endPoint]];
 }
 
 - (void)fireEnemyProjectileFromInvader:(CCSprite *)invaderSprite
@@ -469,9 +461,9 @@ int currentVerticalMoveDistance = 0;
     
     [projectile setPosition:invaderPosition];
     
-    CGPoint endPoint = CGPointMake(invaderPosition.x, -5);
+    CGPoint endPoint = CGPointMake(invaderPosition.x, invaderPosition.y - [[CCDirector sharedDirector] winSize].height);
     
-    [projectile runAction:[CCMoveTo actionWithDuration:2 position:endPoint]];
+    [projectile runAction:[CCMoveTo actionWithDuration:3 position:endPoint]];
 }
 
 - (void)spriteMoveFinished:(id)sender 
