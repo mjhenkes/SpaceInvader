@@ -29,4 +29,10 @@
 // moves the invader in the correct direction
 - (void)moveInvader:(CCSprite *)invader;
 
+// initialize the sprites and position them correctly for the new game
+- (void)initializeGame;
+
+// resets the game
+- (void)resetGame;
+
 @end
