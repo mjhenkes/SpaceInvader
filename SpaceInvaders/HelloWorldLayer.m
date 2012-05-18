@@ -13,25 +13,30 @@
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
 
-NSMutableArray *allInvaderColumns;
+CCSprite *turret;
+
+//projectiles
 NSMutableArray *allProjectiles;
 NSMutableArray *allEnemyProjectiles;
-
-CCSprite *turret;
 int projectileIndex = 0;
 int enemyProjectileIndex = 0;
-int horizontalSpeed = 3;
-int verticalSpeed = 12;
-int numberOfInvaderColumns = 7;
 int numberOfProjectiles = 2;
 int numberOfEnemyProjectiles = 100;
 CGFloat enemyFireProbability = 0.02;
-int currentDirection = Right;
-int previousDirection = Right;
-int horizontalMoveDistance = 420;
-int vertiicalMoveDistance = 36;
-int currentHorizontalMoveDistance = 0;
-int currentVerticalMoveDistance = 0;
+
+// general
+int leftMargin = 32;
+int rightMargin;
+
+// invaders
+NSMutableArray *allInvaderColumns;
+int numberOfInvaderColumns = 10;
+int invaderOffset = 22;
+int invaderXMoveTimeInterval = 360;
+int invaderYMoveTimeInterval = 10;
+int invaderFrameCount = 0;
+CGPoint invaderVelocity;
+int invaderYMoveDistance = 44;
 
 #pragma mark - HelloWorldLayer
 
@@ -94,13 +99,9 @@ int currentVerticalMoveDistance = 0;
         CCAnimation *pingAnim = [CCAnimation animationWithSpriteFrames:pingFrames delay:1];
         CCAnimation *vicAnim = [CCAnimation animationWithSpriteFrames:vicFrames delay:1];
         
-        currentHorizontalMoveDistance = horizontalMoveDistance;
-        currentVerticalMoveDistance = vertiicalMoveDistance;
-        
         allInvaderColumns = [[NSMutableArray alloc] init];
         
-        int xOffset = 72;
-        int invaderSpace = 0;
+        int xOffset = leftMargin;
         
         for (int i = 0; i < numberOfInvaderColumns; i++)
         {
@@ -110,33 +111,35 @@ int currentVerticalMoveDistance = 0;
             int yOffset = 0;
             
             CCSprite *invader02 = [CCSprite spriteWithFile:@"invader02_1.png"];
-            [invader02 setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32 - yOffset)];
+            CGRect invader02BoundingBox = [invader02 boundingBox];
+            [invader02 setPosition:CGPointMake(xOffset + [invader02 contentSize].width/2, [[CCDirector sharedDirector] winSize].height - [invader02 contentSize].height/2 - 0)];
             [invader02 runAction:[CCRepeatForever actionWithAction: 
                                 [CCAnimate actionWithAnimation:invaderAnim]]];
             [self addChild:invader02];
             [invaderColumn addObject:invader02];
             
-            yOffset += 72;
+            yOffset += invader02BoundingBox.size.height + invaderOffset;
             
             CCSprite *invaderVic = [CCSprite spriteWithFile:@"invaderVic1.png"];
-            [invaderVic setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32 - yOffset)];
+            [invaderVic setPosition:CGPointMake(xOffset + [invader02 contentSize].width/2, [[CCDirector sharedDirector] winSize].height - [invader02 contentSize].height/2 - yOffset)];
             [invaderVic runAction:[CCRepeatForever actionWithAction: 
                                   [CCAnimate actionWithAnimation:vicAnim]]];
             [self addChild:invaderVic];
             [invaderColumn addObject:invaderVic];
             
-            yOffset += 72;
+            yOffset += invader02BoundingBox.size.height + invaderOffset;
             
             CCSprite *invaderPing = [CCSprite spriteWithFile:@"invaderPing1.png"];
-            [invaderPing setPosition:CGPointMake(xOffset + invaderSpace, [[CCDirector sharedDirector] winSize].height -32 - yOffset)];
+            [invaderPing setPosition:CGPointMake(xOffset + [invader02 contentSize].width/2, [[CCDirector sharedDirector] winSize].height - [invader02 contentSize].height/2 - yOffset)];
             [invaderPing runAction:[CCRepeatForever actionWithAction: 
                                    [CCAnimate actionWithAnimation:pingAnim]]];
             [self addChild:invaderPing];
             [invaderColumn addObject:invaderPing];
             
-            xOffset += 72;
-            invaderSpace += 5;
+            xOffset += invader02BoundingBox.size.width + invaderOffset;
         }
+        
+        rightMargin = [[CCDirector sharedDirector] winSize].width - leftMargin;
         
         allProjectiles = [[NSMutableArray alloc] init];
         
@@ -176,20 +179,6 @@ int currentVerticalMoveDistance = 0;
 	[super dealloc];
 }
 
-#pragma mark GameKit delegate
-
-- (void)achievementViewControllerDidFinish:(GKAchievementViewController *)viewController
-{
-	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-	[[app navController] dismissModalViewControllerAnimated:YES];
-}
-
-- (void)leaderboardViewControllerDidFinish:(GKLeaderboardViewController *)viewController
-{
-	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-	[[app navController] dismissModalViewControllerAnimated:YES];
-}
-
 - (NSMutableArray *)frontlineInvaders
 {
     NSMutableArray *frontline = [[NSMutableArray alloc] init];
@@ -221,48 +210,52 @@ int currentVerticalMoveDistance = 0;
 #pragma mark Invader Movement
 
 // determines the next direction for the invaders to move
-- (void)determineNextInvaderDirection
-{
-    if (currentDirection == Right || currentDirection == Left)
-    {
-        if (currentHorizontalMoveDistance <= 0)
-        {
-            currentHorizontalMoveDistance = horizontalMoveDistance;
-            previousDirection = currentDirection;
-            currentDirection = Down;
+- (void)determineInvaderVelocity
+{   
+    //Is Time Up?
+    if (invaderFrameCount == 0) {
+        //March
+        if (invaderVelocity.x == 0) {
+            
+            NSMutableArray *frontlineInvaders = [self frontlineInvaders];
+            CGPoint leftCorner = [[frontlineInvaders objectAtIndex:0] position];
+            leftCorner.x -= [[frontlineInvaders objectAtIndex:0] contentSize].width/2;
+        
+            CGPoint rightCorner = [[frontlineInvaders lastObject] position];
+            rightCorner.x += [[frontlineInvaders lastObject] contentSize].width/2;
+        
+            CGFloat rightDistance = rightMargin - rightCorner.x;
+            CGFloat leftDistance = leftCorner.x - leftMargin;
+            CGFloat distance = 0;
+            
+            // Move in the direction of the greater distance.
+            if (rightDistance > leftDistance) {
+                distance = rightDistance;
+            }
+            else {
+                distance = -leftDistance;
+            }
+            
+            invaderVelocity = CGPointMake(distance/invaderXMoveTimeInterval, 0);
+            
+            invaderFrameCount = invaderXMoveTimeInterval;
         }
-        else 
+        //Decend
+        else
         {
-            currentHorizontalMoveDistance -= horizontalSpeed;
+            invaderVelocity = CGPointMake(0, -invaderYMoveDistance/invaderYMoveTimeInterval);
+            
+            invaderFrameCount = invaderYMoveTimeInterval;
         }
     }
-    else // (currentDirection == Down)
-    {
-        if (currentVerticalMoveDistance <= 0)
-        {
-            currentVerticalMoveDistance = vertiicalMoveDistance;
-            
-            if (previousDirection == Right)
-            {
-                previousDirection = currentDirection;
-                currentDirection = Left;
-            }
-            else 
-            {
-                previousDirection = currentDirection;
-                currentDirection = Right;
-            }
-        }
-        else 
-        {
-            currentVerticalMoveDistance -= verticalSpeed;
-        }
-    } 
+    else {
+        invaderFrameCount--;
+    }
 }
 
 - (void)moveAllInvaders
 {
-    [self determineNextInvaderDirection];
+    [self determineInvaderVelocity];
     
     for (int x = 0; x < [allInvaderColumns count]; x++)
     {
@@ -279,21 +272,7 @@ int currentVerticalMoveDistance = 0;
 {
     if (invader != nil)
     {
-        if (currentDirection == Right)
-        {
-            // keep moving right
-            invader.position = ccp(invader.position.x + horizontalSpeed, invader.position.y);
-        }
-        else if (currentDirection == Left)
-        {
-            // keep moving left
-            invader.position = ccp(invader.position.x - horizontalSpeed, invader.position.y);
-        }
-        else // (direction == Down)
-        {
-            // keep moving down
-            invader.position = ccp(invader.position.x, invader.position.y - verticalSpeed);
-        }
+        invader.position = CGPointMake(invader.position.x + invaderVelocity.x, invader.position.y + invaderVelocity.y);
     }
 }
 
@@ -403,6 +382,7 @@ int currentVerticalMoveDistance = 0;
 - (void)fireProjectile
 {
     CGPoint turretPosition = [turret position];
+    turretPosition.y += [turret contentSize].height/2;
     
     CCSprite *projectile = [self getNextProjectile];
     
@@ -438,6 +418,7 @@ int currentVerticalMoveDistance = 0;
 - (void)fireEnemyProjectileFromInvader:(CCSprite *)invaderSprite
 {
     CGPoint invaderPosition = [invaderSprite position];
+    invaderPosition.y -= [invaderSprite contentSize].height/2;
     
     CCSprite *projectile = [self getNextEnemyProjectile];
     
