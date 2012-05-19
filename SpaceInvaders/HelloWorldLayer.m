@@ -498,6 +498,7 @@ int invaderYMoveDistance = 44;
 - (BOOL)ccTouchBegan:(UITouch *)touch withEvent:(UIEvent *)event
 {
     CGRect shipRect = [turret boundingBox];
+    
     //Inflate rect
     shipRect.size.width += 120;
     shipRect.size.height += 120;
