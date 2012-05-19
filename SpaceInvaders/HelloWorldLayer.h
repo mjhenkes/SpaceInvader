@@ -17,8 +17,6 @@
 {
 }
 
-@property (strong, nonatomic) UIPopoverController *currentPopover;
-
 // fires a missile projectile
 - (void)fireProjectile;
 
@@ -37,10 +35,10 @@
 // resets the game
 - (void)resetGame;
 
-// gives user option to start the game
+// gives user option to start the game or initializes game directly if being resetted
 - (void)startGame;
 
-// gives user the option to end or reset the game
+// ends the game and terminates the app
 - (void)endGame;
 
 @end

@@ -41,6 +41,28 @@ int invaderFrameCount = 0;
 CGPoint invaderVelocity;
 int invaderYMoveDistance = 44;
 
+@interface HelloWorldLayer ()
+
+// initialize the enemy invaders
+- (void)initializeInvaders;
+
+// initailize the ship
+- (void)initializeTurret;
+
+// get the frames for the enemy sprites
+- (void)getSpriteFramesForInvaders:(NSMutableArray **)invaderArray 
+                              vics:(NSMutableArray **)vicArray 
+                             pings:(NSMutableArray **)pingArray;
+
+// add and enemy to an invading column
+- (void)addEnemyToColumn:(NSMutableArray *)column
+         withSpriteFrame:(CCSpriteFrame *)spriteFrame
+           withAnimation:(CCAnimation *)animation
+             withXOffset:(NSInteger)xOffset
+             withYOffset:(NSInteger)yOffset;
+
+@end
+
 #pragma mark - HelloWorldLayer
 
 // HelloWorldLayer implementation
@@ -84,75 +106,8 @@ int invaderYMoveDistance = 44;
 {
     [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
     
-    CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
-    
-    //Create sprites with file here
-    //sprites are global for convinence. Could 
-    turret = [[CCSprite alloc] initWithFile:@"turret.png"];
-    [turret setPosition:CGPointMake(midX + 32, 50)];
-    [self addChild:turret];
-    
-    [[CCSpriteFrameCache sharedSpriteFrameCache] addSpriteFramesWithFile:@"invaderSpriteMap.plist"];
-    
-    NSMutableArray *invaderFrames = [NSMutableArray array];
-    NSMutableArray *pingFrames = [NSMutableArray array];
-    NSMutableArray *vicFrames = [NSMutableArray array];
-    
-    for (int i = 1; i <= 2; ++i)
-    {
-        NSString *invaderPath = [NSString stringWithFormat:@"invader02_%d.png", i];
-        
-        [invaderFrames addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                                   spriteFrameByName:invaderPath]];
-        [pingFrames addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                                spriteFrameByName: [NSString stringWithFormat:@"invaderPing%d.png", i]]];
-        [vicFrames addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                               spriteFrameByName: [NSString stringWithFormat:@"invaderVic%d.png", i]]];
-    }
-    
-    CCAnimation *invaderAnim = [CCAnimation animationWithSpriteFrames:invaderFrames delay:1];
-    CCAnimation *pingAnim = [CCAnimation animationWithSpriteFrames:pingFrames delay:1];
-    CCAnimation *vicAnim = [CCAnimation animationWithSpriteFrames:vicFrames delay:1];
-    
-    allInvaderColumns = [[NSMutableArray alloc] init];
-    
-    int xOffset = leftMargin;
-    
-    for (int i = 0; i < numberOfInvaderColumns; i++)
-    {
-        NSMutableArray *invaderColumn = [[NSMutableArray alloc] init];
-        [allInvaderColumns addObject:invaderColumn];
-        
-        int yOffset = 0;
-        
-        CCSprite *invader02 = [CCSprite spriteWithFile:@"invader02_1.png"];
-        CGRect invader02BoundingBox = [invader02 boundingBox];
-        [invader02 setPosition:CGPointMake(xOffset + [invader02 contentSize].width/2, [[CCDirector sharedDirector] winSize].height - [invader02 contentSize].height/2 - 0)];
-        [invader02 runAction:[CCRepeatForever actionWithAction: 
-                              [CCAnimate actionWithAnimation:invaderAnim]]];
-        [self addChild:invader02];
-        [invaderColumn addObject:invader02];
-        
-        yOffset += invader02BoundingBox.size.height + invaderOffset;
-        
-        CCSprite *invaderVic = [CCSprite spriteWithFile:@"invaderVic1.png"];
-        [invaderVic setPosition:CGPointMake(xOffset + [invader02 contentSize].width/2, [[CCDirector sharedDirector] winSize].height - [invader02 contentSize].height/2 - yOffset)];
-        [invaderVic runAction:[CCRepeatForever actionWithAction: 
-                               [CCAnimate actionWithAnimation:vicAnim]]];
-        [self addChild:invaderVic];
-        [invaderColumn addObject:invaderVic];
-        
-        yOffset += invader02BoundingBox.size.height + invaderOffset;
-        
-        CCSprite *invaderPing = [CCSprite spriteWithFile:@"invaderPing1.png"];
-        [invaderPing setPosition:CGPointMake(xOffset + [invader02 contentSize].width/2, [[CCDirector sharedDirector] winSize].height - [invader02 contentSize].height/2 - yOffset)];
-        [invaderPing runAction:[CCRepeatForever actionWithAction: 
-                                [CCAnimate actionWithAnimation:pingAnim]]];
-        [self addChild:invaderPing];
-        [invaderColumn addObject:invaderPing];
-        
-        xOffset += invader02BoundingBox.size.width + invaderOffset;
-    }
+    [self initializeTurret];
+    [self initializeInvaders];
     
     rightMargin = [[CCDirector sharedDirector] winSize].width - leftMargin;
     
@@ -177,6 +132,93 @@ int invaderYMoveDistance = 44;
     [self schedule:@selector(nextFrame:)];
 }
 
+// initailize the ship
+- (void)initializeTurret
+{
+    CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
+    
+    turret = [[CCSprite alloc] initWithFile:@"turret.png"];
+    [turret setPosition:CGPointMake(midX + 32, 50)];
+    [self addChild:turret];
+}
+
+// initialize the enemy invaders
+- (void)initializeInvaders
+{
+    [[CCSpriteFrameCache sharedSpriteFrameCache] addSpriteFramesWithFile:@"invaderSpriteMap.plist"];
+    
+    NSMutableArray *invaderFrames = [NSMutableArray array];
+    NSMutableArray *pingFrames = [NSMutableArray array];
+    NSMutableArray *vicFrames = [NSMutableArray array];
+    
+    [self getSpriteFramesForInvaders:&invaderFrames vics:&vicFrames pings:&pingFrames];
+    
+    NSMutableArray *enemyAnimations = [[NSMutableArray alloc] initWithObjects:
+                                       [CCAnimation animationWithSpriteFrames:invaderFrames delay:1], 
+                                       [CCAnimation animationWithSpriteFrames:vicFrames delay:1], 
+                                       [CCAnimation animationWithSpriteFrames:pingFrames delay:1], 
+                                       nil];
+    
+    allInvaderColumns = [[NSMutableArray alloc] init];
+    
+    int xOffset = leftMargin;
+    
+    for (int i = 0; i < numberOfInvaderColumns; i++)
+    {
+        NSMutableArray *invaderColumn = [[NSMutableArray alloc] init];
+        [allInvaderColumns addObject:invaderColumn];
+        
+        int yOffset = 0;
+        
+        [self addEnemyToColumn:invaderColumn withSpriteFrame:[invaderFrames objectAtIndex:0] 
+                 withAnimation:[enemyAnimations objectAtIndex:0] withXOffset:xOffset withYOffset:yOffset];
+        
+        yOffset += [[invaderColumn objectAtIndex:0] contentSize].height + invaderOffset;
+        
+        [self addEnemyToColumn:invaderColumn withSpriteFrame:[vicFrames objectAtIndex:0] 
+                 withAnimation:[enemyAnimations objectAtIndex:1] withXOffset:xOffset withYOffset:yOffset];
+        
+        yOffset += [[invaderColumn objectAtIndex:0] contentSize].height + invaderOffset;
+        
+        [self addEnemyToColumn:invaderColumn withSpriteFrame:[pingFrames objectAtIndex:0] 
+                 withAnimation:[enemyAnimations objectAtIndex:2] withXOffset:xOffset withYOffset:yOffset];
+        
+        xOffset += [[invaderColumn objectAtIndex:0] contentSize].width + invaderOffset;
+    }
+}
+
+// get the frames for the enemy sprites
+- (void)getSpriteFramesForInvaders:(NSMutableArray **)invaderArray 
+                              vics:(NSMutableArray **)vicArray 
+                             pings:(NSMutableArray **)pingArray
+{
+    for (int i = 1; i <= 2; ++i)
+    {
+        [*invaderArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+                                   spriteFrameByName:[NSString stringWithFormat:@"invader02_%d.png", i]]];
+        [*pingArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+                                spriteFrameByName: [NSString stringWithFormat:@"invaderPing%d.png", i]]];
+        [*vicArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+                               spriteFrameByName: [NSString stringWithFormat:@"invaderVic%d.png", i]]];
+    }
+}
+
+// add and enemy to an invading column
+- (void)addEnemyToColumn:(NSMutableArray *)column
+         withSpriteFrame:(CCSpriteFrame *)spriteFrame
+           withAnimation:(CCAnimation *)animation
+             withXOffset:(NSInteger)xOffset
+             withYOffset:(NSInteger)yOffset
+{
+    CCSprite *enemySprite = [CCSprite spriteWithSpriteFrame:spriteFrame];
+    [enemySprite setPosition:CGPointMake(xOffset + [enemySprite contentSize].width/2, [[CCDirector sharedDirector] winSize].height - [enemySprite contentSize].height/2 - yOffset)];
+    [enemySprite runAction:[CCRepeatForever actionWithAction: 
+                          [CCAnimate actionWithAnimation:animation]]];
+    [self addChild:enemySprite];
+    [column addObject:enemySprite];
+}
+
+// gives user option to start the game or initializes game directly if being resetted
 - (void)startGame
 {
     if (![[CCDirector sharedDirector] isPaused])
@@ -196,6 +238,7 @@ int invaderYMoveDistance = 44;
     }
 }
 
+// resets the game
 - (void)resetGame
 {
     [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
@@ -203,6 +246,7 @@ int invaderYMoveDistance = 44;
     [[CCDirector sharedDirector] resume];
 }
 
+// ends the game and terminates the app
 - (void)endGame
 {
     [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
