@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		325538CE1567F60700532A04 /* StartGame.xib in Resources */ = {isa = PBXBuildFile; fileRef = 325538CD1567F60700532A04 /* StartGame.xib */; };
+		325539351567F8AA00532A04 /* EndGame.xib in Resources */ = {isa = PBXBuildFile; fileRef = 325539341567F8AA00532A04 /* EndGame.xib */; };
+		325539381567FA8D00532A04 /* StartGameContoller.m in Sources */ = {isa = PBXBuildFile; fileRef = 325539371567FA8D00532A04 /* StartGameContoller.m */; };
+		3255399E156808BB00532A04 /* EndGameController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3255399D156808BB00532A04 /* EndGameController.m */; };
 		32B6BE9E155EF91E00FC6854 /* invaderSpriteMap.png in Resources */ = {isa = PBXBuildFile; fileRef = 32B6BE9D155EF91E00FC6854 /* invaderSpriteMap.png */; };
 		32B6BEA1155EFAF000FC6854 /* invaderSpriteMap.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32B6BEA0155EFAEF00FC6854 /* invaderSpriteMap.plist */; };
 		662C33A81526AF66008D91DA /* invader.png in Resources */ = {isa = PBXBuildFile; fileRef = 662C33A51526AF66008D91DA /* invader.png */; };
@@ -143,6 +147,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		325538CD1567F60700532A04 /* StartGame.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StartGame.xib; sourceTree = "<group>"; };
+		325539341567F8AA00532A04 /* EndGame.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EndGame.xib; sourceTree = "<group>"; };
+		325539361567FA8D00532A04 /* StartGameContoller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StartGameContoller.h; sourceTree = "<group>"; };
+		325539371567FA8D00532A04 /* StartGameContoller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StartGameContoller.m; sourceTree = "<group>"; };
+		3255399C156808BB00532A04 /* EndGameController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EndGameController.h; sourceTree = "<group>"; };
+		3255399D156808BB00532A04 /* EndGameController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EndGameController.m; sourceTree = "<group>"; };
 		32B6BE9D155EF91E00FC6854 /* invaderSpriteMap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invaderSpriteMap.png; path = Resources/invaderSpriteMap.png; sourceTree = "<group>"; };
 		32B6BEA0155EFAEF00FC6854 /* invaderSpriteMap.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = invaderSpriteMap.plist; path = Resources/invaderSpriteMap.plist; sourceTree = "<group>"; };
 		662C33A51526AF66008D91DA /* invader.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = invader.png; path = Resources/invader.png; sourceTree = "<group>"; };
@@ -472,6 +482,10 @@
 				66C0836C1523ED1B00BE22E1 /* AppDelegate.m */,
 				66C0836E1523ED1B00BE22E1 /* HelloWorldLayer.h */,
 				66C0836F1523ED1B00BE22E1 /* HelloWorldLayer.m */,
+				325539361567FA8D00532A04 /* StartGameContoller.h */,
+				325539371567FA8D00532A04 /* StartGameContoller.m */,
+				3255399C156808BB00532A04 /* EndGameController.h */,
+				3255399D156808BB00532A04 /* EndGameController.m */,
 				66C081FB1523ED1900BE22E1 /* Resources */,
 				66C082131523ED1900BE22E1 /* libs */,
 				66C083671523ED1B00BE22E1 /* Supporting Files */,
@@ -482,6 +496,8 @@
 		66C081FB1523ED1900BE22E1 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				325538CD1567F60700532A04 /* StartGame.xib */,
+				325539341567F8AA00532A04 /* EndGame.xib */,
 				32B6BEA0155EFAEF00FC6854 /* invaderSpriteMap.plist */,
 				32B6BE9D155EF91E00FC6854 /* invaderSpriteMap.png */,
 				C3136D65155EEE4A00663553 /* invader02_1.png */,
@@ -923,6 +939,8 @@
 				C3136D70155EEE4A00663553 /* invaderVic2.png in Resources */,
 				32B6BE9E155EF91E00FC6854 /* invaderSpriteMap.png in Resources */,
 				32B6BEA1155EFAF000FC6854 /* invaderSpriteMap.plist in Resources */,
+				325538CE1567F60700532A04 /* StartGame.xib in Resources */,
+				325539351567F8AA00532A04 /* EndGame.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1034,6 +1052,8 @@
 				66C0836A1523ED1B00BE22E1 /* main.m in Sources */,
 				66C0836D1523ED1B00BE22E1 /* AppDelegate.m in Sources */,
 				66C083701523ED1B00BE22E1 /* HelloWorldLayer.m in Sources */,
+				325539381567FA8D00532A04 /* StartGameContoller.m in Sources */,
+				3255399E156808BB00532A04 /* EndGameController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

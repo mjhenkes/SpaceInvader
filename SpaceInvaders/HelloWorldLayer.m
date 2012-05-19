@@ -13,6 +13,9 @@
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
 
+#import "StartGameContoller.h"
+#import "EndGameController.h"
+
 CCSprite *turret;
 
 //projectiles
@@ -69,7 +72,7 @@ int invaderYMoveDistance = 44;
     {
         srand(time(NULL));
         
-        [self initializeGame];
+        [self startGame];
         
         self.isTouchEnabled = YES;
 	}
@@ -79,6 +82,8 @@ int invaderYMoveDistance = 44;
 // initialize the sprites and position them correctly for the new game
 - (void)initializeGame
 {
+    [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
+    
     CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
     
     //Create sprites with file here
@@ -170,6 +175,40 @@ int invaderYMoveDistance = 44;
     }
     
     [self schedule:@selector(nextFrame:)];
+}
+
+- (void)startGame
+{
+    if (![[CCDirector sharedDirector] isPaused])
+    {
+        StartGameContoller *controller = [[StartGameContoller alloc] initWithNibName:@"StartGame" 
+                                                                              bundle:nil 
+                                                                            delegate:self];
+        
+        controller.modalPresentationStyle = UIModalPresentationFormSheet;
+        
+        [[CCDirector sharedDirector] presentModalViewController:controller animated:YES];
+    }
+    else 
+    {
+        // from replacing the scene during reset
+        [self initializeGame];
+    }
+}
+
+- (void)resetGame
+{
+    [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
+    [[CCDirector sharedDirector] replaceScene:[HelloWorldLayer scene]];
+    [[CCDirector sharedDirector] resume];
+}
+
+- (void)endGame
+{
+    [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
+    [[CCDirector sharedDirector] popScene];
+    [[[CCDirector sharedDirector] runningThread] release];
+    exit(0);
 }
 
 #pragma mark initization
@@ -310,7 +349,16 @@ int invaderYMoveDistance = 44;
             turret = nil;
             [self unschedule:_cmd];
         
-            // Trigger game over
+            // end game popup
+            [[CCDirector sharedDirector] pause];
+            
+            EndGameController *controller = [[EndGameController alloc] initWithNibName:@"EndGame" 
+                                                                                bundle:nil 
+                                                                              delegate:self];
+            
+            controller.modalPresentationStyle = UIModalPresentationFormSheet;
+            
+            [[CCDirector sharedDirector] presentModalViewController:controller animated:YES];
         }
     }
 }
@@ -494,11 +542,5 @@ int invaderYMoveDistance = 44;
     
     turret.position = location;        
 }
-
-- (void)resetGame
-{
-    [[CCDirector sharedDirector] replaceScene:[HelloWorldLayer scene]];
-}
-
                                          
 @end
