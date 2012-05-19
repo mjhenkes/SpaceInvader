@@ -18,12 +18,14 @@
 
 CCSprite *turret;
 
-//projectiles
-NSMutableArray *allProjectiles;
+//Ship Projectiles
+NSMutableArray *allShipProjectiles;
+int shipProjectileIndex = 0;
+int numberOfShipProjectiles = 2;
+
+//Enemy Projectiles
 NSMutableArray *allEnemyProjectiles;
-int projectileIndex = 0;
 int enemyProjectileIndex = 0;
-int numberOfProjectiles = 2;
 int numberOfEnemyProjectiles = 100;
 CGFloat enemyFireProbability = 0.01;
 
@@ -147,14 +149,16 @@ int invaderYMoveDistance = 44;
     [self initializeInvaders];
     
     rightMargin = [[CCDirector sharedDirector] winSize].width - leftMargin;
+    invaderFrameCount = 0;
+    invaderVelocity = CGPointMake(0, 0);
     
-    allProjectiles = [[NSMutableArray alloc] init];
+    allShipProjectiles = [[NSMutableArray alloc] init];
     
-    for (int i = 0; i < numberOfProjectiles; i++)
+    for (int i = 0; i < numberOfShipProjectiles; i++)
     {
         CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
         [self addChild:projectile];
-        [allProjectiles addObject:projectile];
+        [allShipProjectiles addObject:projectile];
     }
     
     allEnemyProjectiles = [[NSMutableArray alloc] init];
@@ -175,7 +179,7 @@ int invaderYMoveDistance = 44;
     CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
     
     turret = [[CCSprite alloc] initWithFile:@"turret.png"];
-    [turret setPosition:CGPointMake(midX + 32, 50)];
+    [turret setPosition:CGPointMake(midX + [turret contentSize].width/2, 50)];
     [self addChild:turret];
 }
 
@@ -309,27 +313,30 @@ int invaderYMoveDistance = 44;
         if (invaderVelocity.x == 0) {
             
             NSMutableArray *frontlineInvaders = [self frontlineInvaders];
-            CGPoint leftCorner = [[frontlineInvaders objectAtIndex:0] position];
-            leftCorner.x -= [[frontlineInvaders objectAtIndex:0] contentSize].width/2;
+            
+            if ([frontlineInvaders count]) {
+                CGPoint leftCorner = [[frontlineInvaders objectAtIndex:0] position];
+                leftCorner.x -= [[frontlineInvaders objectAtIndex:0] contentSize].width/2;
         
-            CGPoint rightCorner = [[frontlineInvaders lastObject] position];
-            rightCorner.x += [[frontlineInvaders lastObject] contentSize].width/2;
+                CGPoint rightCorner = [[frontlineInvaders lastObject] position];
+                rightCorner.x += [[frontlineInvaders lastObject] contentSize].width/2;
         
-            CGFloat rightDistance = rightMargin - rightCorner.x;
-            CGFloat leftDistance = leftCorner.x - leftMargin;
-            CGFloat distance = 0;
+                CGFloat rightDistance = rightMargin - rightCorner.x;
+                CGFloat leftDistance = leftCorner.x - leftMargin;
+                CGFloat distance = 0;
             
-            // Move in the direction of the greater distance.
-            if (rightDistance > leftDistance) {
-                distance = rightDistance;
+                // Move in the direction of the greater distance.
+                if (rightDistance > leftDistance) {
+                    distance = rightDistance;
+                }
+                else {
+                    distance = -leftDistance;
+                }
+            
+                invaderVelocity = CGPointMake(distance/invaderXMoveTimeInterval, 0);
+            
+                invaderFrameCount = invaderXMoveTimeInterval;
             }
-            else {
-                distance = -leftDistance;
-            }
-            
-            invaderVelocity = CGPointMake(distance/invaderXMoveTimeInterval, 0);
-            
-            invaderFrameCount = invaderXMoveTimeInterval;
         }
         //Decend
         else
@@ -412,9 +419,9 @@ int invaderYMoveDistance = 44;
 // checks to see if the projectile has hit any invaders
 - (void)checkInvaderCollision
 {
-    for (int i = 0; i < numberOfProjectiles; i++)
+    for (int i = 0; i < numberOfShipProjectiles; i++)
     {
-        CCSprite *projectile = [allProjectiles objectAtIndex:i];
+        CCSprite *projectile = [allShipProjectiles objectAtIndex:i];
         
         for (int x = 0; x < [allInvaderColumns count]; x++)
         {
@@ -446,14 +453,14 @@ int invaderYMoveDistance = 44;
 #pragma mark Projectile Creation
 
 // will return the next projectile to fire for the ship
-- (CCSprite *)getNextProjectile
+- (CCSprite *)getNextShipProjectile
 {
-    CCSprite *projectile = [allProjectiles objectAtIndex:projectileIndex];
+    CCSprite *projectile = [allShipProjectiles objectAtIndex:shipProjectileIndex];
     
-    projectileIndex++;
-    if (projectileIndex == numberOfProjectiles)
+    shipProjectileIndex++;
+    if (shipProjectileIndex == numberOfShipProjectiles)
     {
-        projectileIndex = 0;
+        shipProjectileIndex = 0;
     }
     
     if (![[self children] containsObject:projectile]) 
@@ -462,6 +469,26 @@ int invaderYMoveDistance = 44;
     }
         
     return projectile;
+}
+
+// fires a projectile
+- (void)fireShipProjectile
+{
+    CGPoint turretPosition = [turret position];
+    
+    CCSprite *projectile = [self getNextShipProjectile];
+    turretPosition.y += [turret contentSize].height/2 + [projectile contentSize].height/2;
+    
+    if ([projectile numberOfRunningActions] > 0)
+    {
+        return;
+    }
+    
+    [projectile setPosition:turretPosition];
+
+    CGPoint endPoint = CGPointMake(turretPosition.x, turretPosition.y + [[CCDirector sharedDirector] winSize].height);
+    
+    [projectile runAction:[CCMoveTo actionWithDuration:2 position:endPoint]];
 }
 
 // will return the next projectile to fire for the ship
@@ -475,27 +502,12 @@ int invaderYMoveDistance = 44;
         enemyProjectileIndex = 0;
     }
     
-    return projectile;
-}
-
-// fires a projectile
-- (void)fireProjectile
-{
-    CGPoint turretPosition = [turret position];
-    turretPosition.y += [turret contentSize].height/2;
-    
-    CCSprite *projectile = [self getNextProjectile];
-    
-    if ([projectile numberOfRunningActions] > 0)
+    if (![[self children] containsObject:projectile]) 
     {
-        return;
+        [self addChild:projectile];
     }
     
-    [projectile setPosition:turretPosition];
-
-    CGPoint endPoint = CGPointMake(turretPosition.x, turretPosition.y + [[CCDirector sharedDirector] winSize].height);
-    
-    [projectile runAction:[CCMoveTo actionWithDuration:2 position:endPoint]];
+    return projectile;
 }
 
 - (void)fireEnemyProjectile
@@ -514,9 +526,8 @@ int invaderYMoveDistance = 44;
 - (void)fireEnemyProjectileFromInvader:(CCSprite *)invaderSprite
 {
     CGPoint invaderPosition = [invaderSprite position];
-    invaderPosition.y -= [invaderSprite contentSize].height/2;
-    
     CCSprite *projectile = [self getNextEnemyProjectile];
+    invaderPosition.y -= [invaderSprite contentSize].height/2 + [projectile contentSize].height/2;
     
     if ([projectile numberOfRunningActions] > 0)
     {
@@ -554,8 +565,8 @@ int invaderYMoveDistance = 44;
     
     if (CGRectContainsPoint(shipRect, touchPoint)) 
     {
-        [self fireProjectile];
-        [self schedule:@selector(fireProjectile) interval:1];
+        [self fireShipProjectile];
+        [self schedule:@selector(fireShipProjectile) interval:1];
         
         return YES;
     }
