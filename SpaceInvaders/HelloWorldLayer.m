@@ -513,11 +513,13 @@ int invaderYMoveDistance = 44;
     {
         [self fireProjectile];
         [self schedule:@selector(fireProjectile) interval:1];
+        
+        return YES;
     }
     
     //ccTime time = 1;
     
-    return YES;
+    return NO;
 }
 
 - (void)spriteMoveFinished:(id)sender 
