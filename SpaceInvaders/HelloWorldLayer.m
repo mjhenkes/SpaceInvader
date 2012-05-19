@@ -100,14 +100,14 @@ int invaderYMoveDistance = 44;
     
     for (int i = 1; i <= 2; ++i)
     {
-        NSString *invaderPath = [NSString stringWithFormat:@"invader02_%d.png", i];
+        NSString *invaderPath = [NSString stringWithFormat:@"invader02_%d", i];
         
         [invaderFrames addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
                                    spriteFrameByName:invaderPath]];
         [pingFrames addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                                spriteFrameByName: [NSString stringWithFormat:@"invaderPing%d.png", i]]];
+                                spriteFrameByName: [NSString stringWithFormat:@"invaderPing%d", i]]];
         [vicFrames addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                               spriteFrameByName: [NSString stringWithFormat:@"invaderVic%d.png", i]]];
+                               spriteFrameByName: [NSString stringWithFormat:@"invaderVic%d", i]]];
     }
     
     CCAnimation *invaderAnim = [CCAnimation animationWithSpriteFrames:invaderFrames delay:1];
