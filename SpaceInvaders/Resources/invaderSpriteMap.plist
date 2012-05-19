@@ -11,7 +11,7 @@
 	</dict>
 	<key>frames</key>
 	<dict>
-		<key>invader02_1.png</key>
+		<key>invader02_1</key>
 		<dict>
 			<key>x</key>
 			<integer>226</integer>
@@ -30,7 +30,7 @@
 			<key>originalHeight</key>
 			<integer>44</integer>
 		</dict>
-		<key>invader02_2.png</key>
+		<key>invader02_2</key>
 		<dict>
 			<key>x</key>
 			<integer>181</integer>
@@ -49,7 +49,7 @@
 			<key>originalHeight</key>
 			<integer>44</integer>
 		</dict>
-		<key>invaderPing1.png</key>
+		<key>invaderPing1</key>
 		<dict>
 			<key>x</key>
 			<integer>136</integer>
@@ -68,7 +68,7 @@
 			<key>originalHeight</key>
 			<integer>44</integer>
 		</dict>
-		<key>invaderPing2.png</key>
+		<key>invaderPing2</key>
 		<dict>
 			<key>x</key>
 			<integer>91</integer>
@@ -87,7 +87,7 @@
 			<key>originalHeight</key>
 			<integer>44</integer>
 		</dict>
-		<key>invaderVic1.png</key>
+		<key>invaderVic1</key>
 		<dict>
 			<key>x</key>
 			<integer>46</integer>
@@ -106,7 +106,7 @@
 			<key>originalHeight</key>
 			<integer>44</integer>
 		</dict>
-		<key>invaderVic2.png</key>
+		<key>invaderVic2</key>
 		<dict>
 			<key>x</key>
 			<integer>1</integer>

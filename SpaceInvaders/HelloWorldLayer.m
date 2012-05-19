@@ -25,7 +25,7 @@ int projectileIndex = 0;
 int enemyProjectileIndex = 0;
 int numberOfProjectiles = 2;
 int numberOfEnemyProjectiles = 100;
-CGFloat enemyFireProbability = 0.02;
+CGFloat enemyFireProbability = 0.01;
 
 // general
 int leftMargin = 32;
@@ -195,11 +195,11 @@ int invaderYMoveDistance = 44;
     for (int i = 1; i <= 2; ++i)
     {
         [*invaderArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                                   spriteFrameByName:[NSString stringWithFormat:@"invader02_%d.png", i]]];
+                                   spriteFrameByName:[NSString stringWithFormat:@"invader02_%d", i]]];
         [*pingArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                                spriteFrameByName: [NSString stringWithFormat:@"invaderPing%d.png", i]]];
+                                spriteFrameByName: [NSString stringWithFormat:@"invaderPing%d", i]]];
         [*vicArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                               spriteFrameByName: [NSString stringWithFormat:@"invaderVic%d.png", i]]];
+                               spriteFrameByName: [NSString stringWithFormat:@"invaderVic%d", i]]];
     }
 }
 
@@ -286,6 +286,8 @@ int invaderYMoveDistance = 44;
 // Code to run for each frame executed
 - (void)nextFrame:(ccTime)dt 
 {
+    // Game over check here.
+    
     [self moveAllInvaders];
     
     [self fireEnemyProjectile];
@@ -500,13 +502,9 @@ int invaderYMoveDistance = 44;
 {
     for (CCSprite *bottomInvader in [self frontlineInvaders]) 
     {
-        int random = rand() % 100;
-    
-        CGFloat fireCalculations = random;
-    
-        CGFloat difference = fireCalculations - (enemyFireProbability * 100);
-    
-        if (difference < 0)
+        int random = rand() % 100000;
+        
+        if (random < (enemyFireProbability) * 100000)
         {                    
             [self fireEnemyProjectileFromInvader:bottomInvader];
         }
@@ -544,11 +542,12 @@ int invaderYMoveDistance = 44;
 - (BOOL)ccTouchBegan:(UITouch *)touch withEvent:(UIEvent *)event
 {
     CGRect shipRect = [turret boundingBox];
+    
     //Inflate rect
     shipRect.size.width += 120;
-    shipRect.size.height += 60;
+    shipRect.size.height += 120;
     shipRect.origin.x -= 60;
-    shipRect.origin.y -= 120;
+    shipRect.origin.y -= 60;
     
     
     CGPoint touchPoint = [self convertTouchToNodeSpace:touch];
@@ -557,11 +556,13 @@ int invaderYMoveDistance = 44;
     {
         [self fireProjectile];
         [self schedule:@selector(fireProjectile) interval:1];
+        
+        return YES;
     }
     
     //ccTime time = 1;
     
-    return YES;
+    return NO;
 }
 
 - (void)spriteMoveFinished:(id)sender 
