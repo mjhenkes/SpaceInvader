@@ -101,6 +101,43 @@ int invaderYMoveDistance = 44;
 	return self;
 }
 
+// gives user option to start the game or initializes game directly if being resetted
+- (void)startGame
+{
+    if (![[CCDirector sharedDirector] isPaused])
+    {
+        StartGameContoller *controller = [[StartGameContoller alloc] initWithNibName:@"StartGame" 
+                                                                              bundle:nil 
+                                                                            delegate:self];
+        
+        controller.modalPresentationStyle = UIModalPresentationFormSheet;
+        
+        [[CCDirector sharedDirector] presentModalViewController:controller animated:YES];
+    }
+    else 
+    {
+        // from replacing the scene during reset
+        [self initializeGame];
+    }
+}
+
+// resets the game
+- (void)resetGame
+{
+    [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
+    [[CCDirector sharedDirector] replaceScene:[HelloWorldLayer scene]];
+    [[CCDirector sharedDirector] resume];
+}
+
+// ends the game and terminates the app
+- (void)endGame
+{
+    [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
+    [[CCDirector sharedDirector] popScene];
+    [[[CCDirector sharedDirector] runningThread] release];
+    exit(0);
+}
+
 // initialize the sprites and position them correctly for the new game
 - (void)initializeGame
 {
@@ -216,43 +253,6 @@ int invaderYMoveDistance = 44;
                           [CCAnimate actionWithAnimation:animation]]];
     [self addChild:enemySprite];
     [column addObject:enemySprite];
-}
-
-// gives user option to start the game or initializes game directly if being resetted
-- (void)startGame
-{
-    if (![[CCDirector sharedDirector] isPaused])
-    {
-        StartGameContoller *controller = [[StartGameContoller alloc] initWithNibName:@"StartGame" 
-                                                                              bundle:nil 
-                                                                            delegate:self];
-        
-        controller.modalPresentationStyle = UIModalPresentationFormSheet;
-        
-        [[CCDirector sharedDirector] presentModalViewController:controller animated:YES];
-    }
-    else 
-    {
-        // from replacing the scene during reset
-        [self initializeGame];
-    }
-}
-
-// resets the game
-- (void)resetGame
-{
-    [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
-    [[CCDirector sharedDirector] replaceScene:[HelloWorldLayer scene]];
-    [[CCDirector sharedDirector] resume];
-}
-
-// ends the game and terminates the app
-- (void)endGame
-{
-    [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
-    [[CCDirector sharedDirector] popScene];
-    [[[CCDirector sharedDirector] runningThread] release];
-    exit(0);
 }
 
 #pragma mark initization
