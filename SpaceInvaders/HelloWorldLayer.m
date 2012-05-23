@@ -16,7 +16,7 @@
 #import "StartGameContoller.h"
 #import "EndGameController.h"
 
-CCSprite *turret;
+CCSprite *ship;
 
 //Ship Projectiles
 NSMutableArray *allShipProjectiles;
@@ -49,12 +49,13 @@ int invaderYMoveDistance = 44;
 - (void)initializeInvaders;
 
 // initailize the ship
-- (void)initializeTurret;
+- (void)initializeShip;
 
 // get the frames for the enemy sprites
 - (void)getSpriteFramesForInvaders:(NSMutableArray **)invaderArray 
                               vics:(NSMutableArray **)vicArray 
-                             pings:(NSMutableArray **)pingArray;
+                             pings:(NSMutableArray **)pingArray
+                             robos:(NSMutableArray **)roboArray;
 
 // add and enemy to an invading column
 - (void)addEnemyToColumn:(NSMutableArray *)column
@@ -145,7 +146,7 @@ int invaderYMoveDistance = 44;
 {
     [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
     
-    [self initializeTurret];
+    [self initializeShip];
     [self initializeInvaders];
     
     rightMargin = [[CCDirector sharedDirector] winSize].width - leftMargin;
@@ -174,30 +175,32 @@ int invaderYMoveDistance = 44;
 }
 
 // initailize the ship
-- (void)initializeTurret
+- (void)initializeShip
 {
     CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
     
-    turret = [[CCSprite alloc] initWithFile:@"turret.png"];
-    [turret setPosition:CGPointMake(midX + [turret contentSize].width/2, 50)];
-    [self addChild:turret];
+    ship = [[CCSprite alloc] initWithFile:@"ship.png"];
+    [ship setPosition:CGPointMake(midX + [ship contentSize].width/2, 50)];
+    [self addChild:ship];
 }
 
 // initialize the enemy invaders
 - (void)initializeInvaders
 {
-    [[CCSpriteFrameCache sharedSpriteFrameCache] addSpriteFramesWithFile:@"invaderSpriteMap.plist"];
+    [[CCSpriteFrameCache sharedSpriteFrameCache] addSpriteFramesWithFile:@"spriteMap.plist"];
     
     NSMutableArray *invaderFrames = [NSMutableArray array];
     NSMutableArray *pingFrames = [NSMutableArray array];
     NSMutableArray *vicFrames = [NSMutableArray array];
+    NSMutableArray *roboFrames = [NSMutableArray array];
     
-    [self getSpriteFramesForInvaders:&invaderFrames vics:&vicFrames pings:&pingFrames];
+    [self getSpriteFramesForInvaders:&invaderFrames vics:&vicFrames pings:&pingFrames robos:&roboFrames];
     
     NSMutableArray *enemyAnimations = [[NSMutableArray alloc] initWithObjects:
                                        [CCAnimation animationWithSpriteFrames:invaderFrames delay:1], 
                                        [CCAnimation animationWithSpriteFrames:vicFrames delay:1], 
-                                       [CCAnimation animationWithSpriteFrames:pingFrames delay:1], 
+                                       [CCAnimation animationWithSpriteFrames:pingFrames delay:1],
+                                       [CCAnimation animationWithSpriteFrames:roboFrames delay:1],
                                        nil];
     
     allInvaderColumns = [[NSMutableArray alloc] init];
@@ -232,15 +235,18 @@ int invaderYMoveDistance = 44;
 - (void)getSpriteFramesForInvaders:(NSMutableArray **)invaderArray 
                               vics:(NSMutableArray **)vicArray 
                              pings:(NSMutableArray **)pingArray
+                             robos:(NSMutableArray **)roboArray
 {
     for (int i = 1; i <= 2; ++i)
     {
         [*invaderArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                                   spriteFrameByName:[NSString stringWithFormat:@"invader02_%d", i]]];
+                                   spriteFrameByName:[NSString stringWithFormat:@"eyeGuy%d", i]]];
         [*pingArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                                spriteFrameByName: [NSString stringWithFormat:@"invaderPing%d", i]]];
+                                spriteFrameByName: [NSString stringWithFormat:@"ping%d", i]]];
         [*vicArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
-                               spriteFrameByName: [NSString stringWithFormat:@"invaderVic%d", i]]];
+                               spriteFrameByName: [NSString stringWithFormat:@"vic%d", i]]];
+        [*roboArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+                               spriteFrameByName: [NSString stringWithFormat:@"roboDude%d", i]]];
     }
 }
 
@@ -396,10 +402,10 @@ int invaderYMoveDistance = 44;
     
     for (int i = 0; i < [collideableObjects count]; i++)
     {
-        if ([self checkCollisionOfSprite:[collideableObjects objectAtIndex:i] withSprite:turret]) 
+        if ([self checkCollisionOfSprite:[collideableObjects objectAtIndex:i] withSprite:ship]) 
         {
-            [self removeChild:turret cleanup:YES];
-            turret = nil;
+            [self removeChild:ship cleanup:YES];
+            ship = nil;
             [self unschedule:_cmd];
         
             // end game popup
@@ -474,19 +480,19 @@ int invaderYMoveDistance = 44;
 // fires a projectile
 - (void)fireShipProjectile
 {
-    CGPoint turretPosition = [turret position];
+    CGPoint shipPosition = [ship position];
     
     CCSprite *projectile = [self getNextShipProjectile];
-    turretPosition.y += [turret contentSize].height/2 + [projectile contentSize].height/2;
+    shipPosition.y += [ship contentSize].height/2 + [projectile contentSize].height/2;
     
     if ([projectile numberOfRunningActions] > 0)
     {
         return;
     }
     
-    [projectile setPosition:turretPosition];
+    [projectile setPosition:shipPosition];
 
-    CGPoint endPoint = CGPointMake(turretPosition.x, turretPosition.y + [[CCDirector sharedDirector] winSize].height);
+    CGPoint endPoint = CGPointMake(shipPosition.x, shipPosition.y + [[CCDirector sharedDirector] winSize].height);
     
     [projectile runAction:[CCMoveTo actionWithDuration:2 position:endPoint]];
 }
@@ -552,7 +558,7 @@ int invaderYMoveDistance = 44;
 // when the user taps the screen, fire a missile and move the ship the correct direction
 - (BOOL)ccTouchBegan:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    CGRect shipRect = [turret boundingBox];
+    CGRect shipRect = [ship boundingBox];
     
     //Inflate rect
     shipRect.size.width += 120;
@@ -596,7 +602,7 @@ int invaderYMoveDistance = 44;
     CGPoint location = [self convertTouchToNodeSpace:touch];
     location.y = 50;
     
-    turret.position = location;        
+    ship.position = location;        
 }
                                          
 @end
