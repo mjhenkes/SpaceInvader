@@ -441,6 +441,8 @@ int invaderYMoveDistance = 44;
                     if ([self checkCollisionOfSprite:projectile withSprite:invader]) 
                     {
                         [self removeChild:invader cleanup:YES];
+                        
+                        //what the hell is this?
                         [self unschedule:_cmd];
                     
                         [[allInvaderColumns objectAtIndex:x] removeObject:invader];
