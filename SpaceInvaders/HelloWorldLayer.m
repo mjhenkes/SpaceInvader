@@ -507,15 +507,14 @@ int invaderYMoveDistance = 44;
 // fires a projectile
 - (void)fireShipProjectile
 {
-    CGPoint shipPosition = [ship position];
-    
     CCSprite *projectile = [self getNextShipProjectile];
-    shipPosition.y += [ship contentSize].height/2 + [projectile contentSize].height/2;
     
     if ([projectile numberOfRunningActions] > 0)
     {
         return;
     }
+    CGPoint shipPosition = [ship position];
+    shipPosition.y += [ship contentSize].height/2 + [projectile contentSize].height/2;
     
     [projectile setPosition:shipPosition];
 
@@ -558,14 +557,14 @@ int invaderYMoveDistance = 44;
 
 - (void)fireEnemyProjectileFromInvader:(CCSprite *)invaderSprite
 {
-    CGPoint invaderPosition = [invaderSprite position];
     CCSprite *projectile = [self getNextEnemyProjectile];
-    invaderPosition.y -= [invaderSprite contentSize].height/2 + [projectile contentSize].height/2;
     
     if ([projectile numberOfRunningActions] > 0)
     {
         return;
     }
+    CGPoint invaderPosition = [invaderSprite position];
+    invaderPosition.y -= [invaderSprite contentSize].height/2 + [projectile contentSize].height/2;
     
     [projectile setPosition:invaderPosition];
     
@@ -599,7 +598,6 @@ int invaderYMoveDistance = 44;
     if (CGRectContainsPoint(shipRect, touchPoint)) 
     {
         [self fireShipProjectile];
-//        [self unschedule:@selector(fireShipProjectile)];
         [self schedule:@selector(fireShipProjectile) interval:1];
         
         return YES;
