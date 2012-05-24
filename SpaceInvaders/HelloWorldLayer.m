@@ -21,7 +21,7 @@ CCSprite *ship;
 //Ship Projectiles
 NSMutableArray *allShipProjectiles;
 int shipProjectileIndex = 0;
-int numberOfShipProjectiles = 2;
+int numberOfShipProjectiles = 3;
 
 //Enemy Projectiles
 NSMutableArray *allEnemyProjectiles;
@@ -148,28 +148,11 @@ int invaderYMoveDistance = 44;
     
     [self initializeShip];
     [self initializeInvaders];
+    [self initializeProjectiles];
     
     rightMargin = [[CCDirector sharedDirector] winSize].width - leftMargin;
     invaderFrameCount = 0;
     invaderVelocity = CGPointMake(0, 0);
-    
-    allShipProjectiles = [[NSMutableArray alloc] init];
-    
-    for (int i = 0; i < numberOfShipProjectiles; i++)
-    {
-        CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
-        [self addChild:projectile];
-        [allShipProjectiles addObject:projectile];
-    }
-    
-    allEnemyProjectiles = [[NSMutableArray alloc] init];
-    
-    for (int i = 0; i < numberOfEnemyProjectiles; i++)
-    {
-        CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
-        [self addChild:projectile];
-        [allEnemyProjectiles addObject:projectile];
-    }
     
     [self schedule:@selector(nextFrame:)];
 }
@@ -180,7 +163,7 @@ int invaderYMoveDistance = 44;
     CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
     
     ship = [[CCSprite alloc] initWithFile:@"ship.png"];
-    [ship setPosition:CGPointMake(midX + [ship contentSize].width/2, 50)];
+    [ship setPosition:CGPointMake(midX, 50)];
     [self addChild:ship];
 }
 
@@ -228,6 +211,27 @@ int invaderYMoveDistance = 44;
                  withAnimation:[enemyAnimations objectAtIndex:2] withXOffset:xOffset withYOffset:yOffset];
         
         xOffset += [[invaderColumn objectAtIndex:0] contentSize].width + invaderOffset;
+    }
+}
+
+- (void)initializeProjectiles
+{
+    allShipProjectiles = [[NSMutableArray alloc] init];
+    
+    for (int i = 0; i < numberOfShipProjectiles; i++)
+    {
+        CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
+        [self addChild:projectile];
+        [allShipProjectiles addObject:projectile];
+    }
+    
+    allEnemyProjectiles = [[NSMutableArray alloc] init];
+    
+    for (int i = 0; i < numberOfEnemyProjectiles; i++)
+    {
+        CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
+        [self addChild:projectile];
+        [allEnemyProjectiles addObject:projectile];
     }
 }
 
@@ -406,7 +410,6 @@ int invaderYMoveDistance = 44;
         {
             [self removeChild:ship cleanup:YES];
             ship = nil;
-            [self unschedule:_cmd];
         
             // end game popup
             [[CCDirector sharedDirector] pause];
@@ -441,9 +444,6 @@ int invaderYMoveDistance = 44;
                     if ([self checkCollisionOfSprite:projectile withSprite:invader]) 
                     {
                         [self removeChild:invader cleanup:YES];
-                        
-                        //what the hell is this?
-                        [self unschedule:_cmd];
                     
                         [[allInvaderColumns objectAtIndex:x] removeObject:invader];
                     
@@ -579,14 +579,7 @@ int invaderYMoveDistance = 44;
         return YES;
     }
     
-    //ccTime time = 1;
-    
     return NO;
-}
-
-- (void)spriteMoveFinished:(id)sender 
-{
-    
 }
 
 - (void)ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event
@@ -596,7 +589,7 @@ int invaderYMoveDistance = 44;
 
 -(void)ccTouchCancelled:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    
+    [self unschedule:@selector(fireProjectile)];
 }
 
 -(void)ccTouchMoved:(UITouch *)touch withEvent:(UIEvent *)event
