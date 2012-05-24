@@ -93,7 +93,7 @@ int invaderYMoveDistance = 44;
 {
 	// always call "super" init
 	// Apple recommends to re-assign "self" with the "super's" return value
-	if ((self=[super init])) 
+	if ((self=[super init]))
     {
         srand(time(NULL));
         
@@ -300,7 +300,26 @@ int invaderYMoveDistance = 44;
 // Code to run for each frame executed
 - (void)nextFrame:(ccTime)dt 
 {
-    // Game over check here.
+//    if ([allInvaderColumns count] == 0) 
+//    {   
+//        [[CCDirector sharedDirector] pause];
+//        [[CCDirector sharedDirector] popScene];
+//        
+//        // Create some menu items
+//        CCMenuItemImage * menuItem1 = [CCMenuItemImage itemFromNormalImage:@"invaderPing1.png"
+//                                                             selectedImage: @"invaderPing2.png"
+//                                                                    target:self
+//                                                                  selector:@selector(resetGame)];
+//        
+//        // Create a menu and add your menu items to it
+//        CCMenu * myMenu = [CCMenu menuWithItems:menuItem1, nil];
+//        
+//        // Arrange the menu items vertically
+//        [myMenu alignItemsVertically];
+//        
+//        // add the menu to your scene
+//        [self addChild:myMenu];
+//    }
     
     [self moveAllInvaders];
     
@@ -446,11 +465,17 @@ int invaderYMoveDistance = 44;
                         [self removeChild:invader cleanup:YES];
                     
                         [[allInvaderColumns objectAtIndex:x] removeObject:invader];
-                    
+                                            
                         invader = nil;
                     
                         [self removeChild:projectile cleanup:YES];
                         projectile.position = CGPointMake(-1, -1);
+                        
+                        if ([[allInvaderColumns objectAtIndex:x] count] == 0) 
+                        {
+                            [allInvaderColumns removeObjectAtIndex:x];
+                            break;
+                        }
                     }
                 }
             }
