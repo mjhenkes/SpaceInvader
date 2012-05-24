@@ -599,6 +599,7 @@ int invaderYMoveDistance = 44;
     if (CGRectContainsPoint(shipRect, touchPoint)) 
     {
         [self fireShipProjectile];
+//        [self unschedule:@selector(fireShipProjectile)];
         [self schedule:@selector(fireShipProjectile) interval:1];
         
         return YES;
@@ -609,12 +610,12 @@ int invaderYMoveDistance = 44;
 
 - (void)ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    [self unschedule:@selector(fireProjectile)];
+    [self unschedule:@selector(fireShipProjectile)];
 }
 
 -(void)ccTouchCancelled:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    [self unschedule:@selector(fireProjectile)];
+    [self unschedule:@selector(fireShipProjectile)];
 }
 
 -(void)ccTouchMoved:(UITouch *)touch withEvent:(UIEvent *)event
