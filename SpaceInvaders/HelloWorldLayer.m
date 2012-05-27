@@ -16,6 +16,7 @@
 #import "StartGameContoller.h"
 #import "EndGameController.h"
 
+//Ship Sprite
 CCSprite *ship;
 
 //Ship Projectiles
@@ -29,11 +30,12 @@ int enemyProjectileIndex = 0;
 int numberOfEnemyProjectiles = 100;
 CGFloat enemyFireProbability = 0.01;
 
-// general
+// General
 int leftMargin = 32;
 int rightMargin;
+int shipYPosition = 50;
 
-// invaders
+// Invaders
 NSMutableArray *allInvaderColumns;
 int numberOfInvaderColumns = 10;
 int invaderOffset = 22;
@@ -52,10 +54,10 @@ int invaderYMoveDistance = 44;
 - (void)initializeShip;
 
 // get the frames for the enemy sprites
-- (void)getSpriteFramesForInvaders:(NSMutableArray **)invaderArray 
-                              vics:(NSMutableArray **)vicArray 
-                             pings:(NSMutableArray **)pingArray
-                             robos:(NSMutableArray **)roboArray;
+- (void)getSpriteFramesForInvaders:(NSMutableArray *)invaderArray 
+                              vics:(NSMutableArray *)vicArray 
+                             pings:(NSMutableArray *)pingArray
+                             robos:(NSMutableArray *)roboArray;
 
 // add and enemy to an invading column
 - (void)addEnemyToColumn:(NSMutableArray *)column
@@ -88,6 +90,8 @@ int invaderYMoveDistance = 44;
 	return scene;
 }
 
+#pragma mark initization
+
 // on "init" you need to initialize your instance
 - (id)init
 {
@@ -95,16 +99,17 @@ int invaderYMoveDistance = 44;
 	// Apple recommends to re-assign "self" with the "super's" return value
 	if ((self=[super init]))
     {
-        srand(time(NULL));
+        //srand(time(NULL));
         
         [self startGame];
         
+        //register for touch events
         self.isTouchEnabled = YES;
 	}
 	return self;
 }
 
-// gives user option to start the game or initializes game directly if being resetted
+// gives user option to start the game or initializes game directly if being reset
 - (void)startGame
 {
     if (![[CCDirector sharedDirector] isPaused])
@@ -146,38 +151,54 @@ int invaderYMoveDistance = 44;
 {
     [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
     
+    // setup ship
     [self initializeShip];
+    
+    // setup invaders
     [self initializeInvaders];
+    
+    // setup projectiles
     [self initializeProjectiles];
     
+    // setup misc
     rightMargin = [[CCDirector sharedDirector] winSize].width - leftMargin;
     invaderFrameCount = 0;
     invaderVelocity = CGPointMake(0, 0);
     
+    // schedule next frame to fire on each frame (approximately 60 times per second)
     [self schedule:@selector(nextFrame:)];
 }
 
 // initailize the ship
 - (void)initializeShip
 {
+    //Find midpoint
     CGFloat midX = [[CCDirector sharedDirector] winSize].width/2;
     
+    // Create ship sprite
     ship = [[CCSprite alloc] initWithFile:@"ship.png"];
-    [ship setPosition:CGPointMake(midX, 50)];
+    
+    // set position of ship (relative to center of sprite)
+    [ship setPosition:CGPointMake(midX, shipYPosition)];
+    
+    // add sprite to layer
     [self addChild:ship];
 }
 
 // initialize the enemy invaders
 - (void)initializeInvaders
 {
+    // Import sprite sheet
     [[CCSpriteFrameCache sharedSpriteFrameCache] addSpriteFramesWithFile:@"spriteMap.plist"];
     
+    // Create arrays for individual invader sprite frames
     NSMutableArray *invaderFrames = [NSMutableArray array];
     NSMutableArray *pingFrames = [NSMutableArray array];
     NSMutableArray *vicFrames = [NSMutableArray array];
     NSMutableArray *roboFrames = [NSMutableArray array];
     
-    [self getSpriteFramesForInvaders:&invaderFrames vics:&vicFrames pings:&pingFrames robos:&roboFrames];
+    //populate arrays with invader frames
+    [self getSpriteFramesForInvaders:invaderFrames vics:vicFrames pings:pingFrames robos:roboFrames];
     
     NSMutableArray *enemyAnimations = [[NSMutableArray alloc] initWithObjects:
                                        [CCAnimation animationWithSpriteFrames:invaderFrames delay:1], 
@@ -186,70 +207,69 @@ int invaderYMoveDistance = 44;
                                        [CCAnimation animationWithSpriteFrames:roboFrames delay:1],
                                        nil];
     
+    //create array to hold columns of invaders
     allInvaderColumns = [[NSMutableArray alloc] init];
     
+    // setup left margin
     int xOffset = leftMargin;
     
+    // add invader columns from left to right
     for (int i = 0; i < numberOfInvaderColumns; i++)
-    {
+    {   
+        //create array to hold individual invaders from top to bottom
         NSMutableArray *invaderColumn = [[NSMutableArray alloc] init];
         [allInvaderColumns addObject:invaderColumn];
         
         int yOffset = 0;
         
+        // Invader
         [self addEnemyToColumn:invaderColumn withSpriteFrame:[invaderFrames objectAtIndex:0] 
                  withAnimation:[enemyAnimations objectAtIndex:0] withXOffset:xOffset withYOffset:yOffset];
         
+        // move down
         yOffset += [[invaderColumn objectAtIndex:0] contentSize].height + invaderOffset;
         
+        // Vic
         [self addEnemyToColumn:invaderColumn withSpriteFrame:[vicFrames objectAtIndex:0] 
                  withAnimation:[enemyAnimations objectAtIndex:1] withXOffset:xOffset withYOffset:yOffset];
         
+        // move down
         yOffset += [[invaderColumn objectAtIndex:0] contentSize].height + invaderOffset;
         
+        // ping
         [self addEnemyToColumn:invaderColumn withSpriteFrame:[pingFrames objectAtIndex:0] 
                  withAnimation:[enemyAnimations objectAtIndex:2] withXOffset:xOffset withYOffset:yOffset];
         
+        // move down
+        yOffset += [[invaderColumn objectAtIndex:0] contentSize].height + invaderOffset;
+        
+        // robo
+        [self addEnemyToColumn:invaderColumn withSpriteFrame:[roboFrames objectAtIndex:0] 
+                 withAnimation:[enemyAnimations objectAtIndex:3] withXOffset:xOffset withYOffset:yOffset];
+        
+        // move right
         xOffset += [[invaderColumn objectAtIndex:0] contentSize].width + invaderOffset;
     }
 }
 
-- (void)initializeProjectiles
-{
-    allShipProjectiles = [[NSMutableArray alloc] init];
-    
-    for (int i = 0; i < numberOfShipProjectiles; i++)
-    {
-        CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
-        [self addChild:projectile];
-        [allShipProjectiles addObject:projectile];
-    }
-    
-    allEnemyProjectiles = [[NSMutableArray alloc] init];
-    
-    for (int i = 0; i < numberOfEnemyProjectiles; i++)
-    {
-        CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
-        [self addChild:projectile];
-        [allEnemyProjectiles addObject:projectile];
-    }
-}
+
 
 // get the frames for the enemy sprites
-- (void)getSpriteFramesForInvaders:(NSMutableArray **)invaderArray 
-                              vics:(NSMutableArray **)vicArray 
-                             pings:(NSMutableArray **)pingArray
-                             robos:(NSMutableArray **)roboArray
+- (void)getSpriteFramesForInvaders:(NSMutableArray *)invaderArray 
+                              vics:(NSMutableArray *)vicArray 
+                             pings:(NSMutableArray *)pingArray
+                             robos:(NSMutableArray *)roboArray
 {
     for (int i = 1; i <= 2; ++i)
     {
-        [*invaderArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+        // note that we are pulling frames from the cache by name setup in the plist for the sprite sheet
+        [invaderArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
                                    spriteFrameByName:[NSString stringWithFormat:@"eyeGuy%d", i]]];
-        [*pingArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+        [pingArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
                                 spriteFrameByName: [NSString stringWithFormat:@"ping%d", i]]];
-        [*vicArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+        [vicArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
                                spriteFrameByName: [NSString stringWithFormat:@"vic%d", i]]];
-        [*roboArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
+        [roboArray addObject: [[CCSpriteFrameCache sharedSpriteFrameCache] 
                                spriteFrameByName: [NSString stringWithFormat:@"roboDude%d", i]]];
     }
 }
@@ -261,15 +281,48 @@ int invaderYMoveDistance = 44;
              withXOffset:(NSInteger)xOffset
              withYOffset:(NSInteger)yOffset
 {
+    // we're creating a sprite from the frame passed in
     CCSprite *enemySprite = [CCSprite spriteWithSpriteFrame:spriteFrame];
+    
+    // set sprite position (relative to center thus the content size calculations
     [enemySprite setPosition:CGPointMake(xOffset + [enemySprite contentSize].width/2, [[CCDirector sharedDirector] winSize].height - [enemySprite contentSize].height/2 - yOffset)];
+    
+    // create action to animate the sprite
     [enemySprite runAction:[CCRepeatForever actionWithAction: 
                           [CCAnimate actionWithAnimation:animation]]];
+    
+    // add sprite to layer
     [self addChild:enemySprite];
+    
+    // add sprite to column
     [column addObject:enemySprite];
 }
 
-#pragma mark initization
+// build projectiles
+- (void)initializeProjectiles
+{
+    // create ship projectile array
+    allShipProjectiles = [[NSMutableArray alloc] init];
+    
+    // create ship projectiles (creating sprites on demand causes a slow down)
+    for (int i = 0; i < numberOfShipProjectiles; i++)
+    {
+        CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
+        [self addChild:projectile];
+        [allShipProjectiles addObject:projectile];
+    }
+    
+    // create enemy projectile array
+    allEnemyProjectiles = [[NSMutableArray alloc] init];
+    
+    // create enemy projectiles 
+    for (int i = 0; i < numberOfEnemyProjectiles; i++)
+    {
+        CCSprite *projectile = [CCSprite spriteWithFile:@"projectile.png"];
+        [self addChild:projectile];
+        [allEnemyProjectiles addObject:projectile];
+    }
+}
 
 // on "dealloc" you need to release all your retained objects
 - (void)dealloc
@@ -282,6 +335,7 @@ int invaderYMoveDistance = 44;
 	[super dealloc];
 }
 
+// create an array of invaders in the "front line" invaders that may fire a projectile
 - (NSMutableArray *)frontlineInvaders
 {
     NSMutableArray *frontline = [[NSMutableArray alloc] init];
@@ -321,35 +375,62 @@ int invaderYMoveDistance = 44;
 //        [self addChild:myMenu];
 //    }
     
+    // move invaders
     [self moveAllInvaders];
     
+    // fire enemy projectiles
     [self fireEnemyProjectile];
     
+    // check for collisions
     [self checkInvaderCollision];
     
+    // check for collisions
     [self checkShipCollision];
 }
 
 
 #pragma mark Invader Movement
+// move invaders based on their calculated velocity
+- (void)moveAllInvaders
+{
+    // find new? invader velocity
+    [self determineInvaderVelocity];
+    
+    for (int x = 0; x < [allInvaderColumns count]; x++)
+    {
+        for (int y = 0; y < [[allInvaderColumns objectAtIndex:x] count]; y++) 
+        {
+            // move each invader on screen
+            CCSprite *invader = [[allInvaderColumns objectAtIndex:x] objectAtIndex:y];
+            
+            // for each sprite apply the velocity to update the invader position
+            // not "animated" but it looks like it is because this will happen 60 times per second
+            invader.position = CGPointMake(invader.position.x + invaderVelocity.x, invader.position.y + invaderVelocity.y);
+        }        
+    }
+}
 
 // determines the next direction for the invaders to move
 - (void)determineInvaderVelocity
 {   
     //Is Time Up?
     if (invaderFrameCount == 0) {
-        //March
+        //March if the last movement was not in the x direction
         if (invaderVelocity.x == 0) {
             
             NSMutableArray *frontlineInvaders = [self frontlineInvaders];
             
+            // if invaders exist
             if ([frontlineInvaders count]) {
+                // find the left corner of the invader block
                 CGPoint leftCorner = [[frontlineInvaders objectAtIndex:0] position];
                 leftCorner.x -= [[frontlineInvaders objectAtIndex:0] contentSize].width/2;
         
+                // find the right corner of the invader block
                 CGPoint rightCorner = [[frontlineInvaders lastObject] position];
                 rightCorner.x += [[frontlineInvaders lastObject] contentSize].width/2;
         
+                // determine the distance from the invader block to the right and left corner of the screen
                 CGFloat rightDistance = rightMargin - rightCorner.x;
                 CGFloat leftDistance = leftCorner.x - leftMargin;
                 CGFloat distance = 0;
@@ -362,49 +443,31 @@ int invaderYMoveDistance = 44;
                     distance = -leftDistance;
                 }
             
+                // set the invader velocity to be only in the x direction over time
                 invaderVelocity = CGPointMake(distance/invaderXMoveTimeInterval, 0);
             
+                // reset the time to complete the movement
                 invaderFrameCount = invaderXMoveTimeInterval;
             }
         }
         //Decend
         else
         {
+            //set velocity with only a y direction over time to move the invaders down
             invaderVelocity = CGPointMake(0, -invaderYMoveDistance/invaderYMoveTimeInterval);
             
+            // reset the time to complete the movement
             invaderFrameCount = invaderYMoveTimeInterval;
         }
     }
     else {
+        // if the aloted time has not elapsed retain the previous velocity
         invaderFrameCount--;
     }
 }
 
-- (void)moveAllInvaders
-{
-    [self determineInvaderVelocity];
-    
-    for (int x = 0; x < [allInvaderColumns count]; x++)
-    {
-        for (int y = 0; y < [[allInvaderColumns objectAtIndex:x] count]; y++) 
-        {
-            // move each invader on screen
-            [self moveInvader:[[allInvaderColumns objectAtIndex:x] objectAtIndex:y]];                        
-        }        
-    }
-}
-
-// Move the invader in the correct direction
-- (void)moveInvader:(CCSprite *)invader
-{
-    if (invader != nil)
-    {
-        invader.position = CGPointMake(invader.position.x + invaderVelocity.x, invader.position.y + invaderVelocity.y);
-    }
-}
-
 #pragma mark Collision Detection
-
+// check two sprites to see if they intersect
 - (BOOL)checkCollisionOfSprite:(CCSprite *)sprite1 withSprite:(CCSprite *)sprite2
 {
     BOOL collide = NO;
@@ -418,15 +481,20 @@ int invaderYMoveDistance = 44;
     return collide;
 }
 
+// check ship sprite aginst collidable objects
 - (void)checkShipCollision
 {
+    // create and array of all objects that could collide with the ship
     NSMutableArray *collideableObjects = [NSMutableArray arrayWithArray:allEnemyProjectiles];
     [collideableObjects addObjectsFromArray:[self frontlineInvaders]];
     
     for (int i = 0; i < [collideableObjects count]; i++)
     {
+        // check each object to see if it has collided with the ship
         if ([self checkCollisionOfSprite:[collideableObjects objectAtIndex:i] withSprite:ship]) 
         {
+            // if an object has collied with the ship,
+            // the ship has been destroyed and we remove it from the layer
             [self removeChild:ship cleanup:YES];
             ship = nil;
         
@@ -447,12 +515,15 @@ int invaderYMoveDistance = 44;
 // checks to see if the projectile has hit any invaders
 - (void)checkInvaderCollision
 {
+    //Check ship projectiles...
     for (int i = 0; i < numberOfShipProjectiles; i++)
     {
         CCSprite *projectile = [allShipProjectiles objectAtIndex:i];
         
+        // against all invader columns...
         for (int x = 0; x < [allInvaderColumns count]; x++)
         {
+            // against all sprites in the columns...
             for (int y = 0; y < [[allInvaderColumns objectAtIndex:x] count]; y++)
             {
                 CCSprite *invader = [[allInvaderColumns objectAtIndex:x] objectAtIndex:y];
@@ -462,20 +533,25 @@ int invaderYMoveDistance = 44;
                     // if the projectile and the invaders rect intersect, we have hit the invader and can remove it
                     if ([self checkCollisionOfSprite:projectile withSprite:invader]) 
                     {
+                        // remove the invader from the layer
                         [self removeChild:invader cleanup:YES];
                     
+                        // remove the invader from the column
                         [[allInvaderColumns objectAtIndex:x] removeObject:invader];
-                                            
-                        invader = nil;
-                    
-                        [self removeChild:projectile cleanup:YES];
-                        projectile.position = CGPointMake(-1, -1);
                         
+                        // if the column has been emptied of invaders, remove it aswell
                         if ([[allInvaderColumns objectAtIndex:x] count] == 0) 
                         {
                             [allInvaderColumns removeObjectAtIndex:x];
                             break;
                         }
+                        
+                        invader = nil;
+                    
+                        // remove the projectile from the layer
+                        [self removeChild:projectile cleanup:YES];
+                        // and hide the projectile off the screen
+                        projectile.position = CGPointMake(-1, -1);
                     }
                 }
             }
@@ -488,14 +564,19 @@ int invaderYMoveDistance = 44;
 // will return the next projectile to fire for the ship
 - (CCSprite *)getNextShipProjectile
 {
+    // Grab the next projectile in the array
     CCSprite *projectile = [allShipProjectiles objectAtIndex:shipProjectileIndex];
     
+    // increment the projectile index
     shipProjectileIndex++;
+    
+    // reset the index if needed
     if (shipProjectileIndex == numberOfShipProjectiles)
     {
         shipProjectileIndex = 0;
     }
     
+    // if the projectile has not been added to the layer, add it now
     if (![[self children] containsObject:projectile]) 
     {
         [self addChild:projectile];
@@ -504,36 +585,50 @@ int invaderYMoveDistance = 44;
     return projectile;
 }
 
-// fires a projectile
+// fires a projectile from the ship
 - (void)fireShipProjectile
 {
+    // grab the next projectile sprite
     CCSprite *projectile = [self getNextShipProjectile];
     
+    // has this sprite already been fired (and has not yet completed it's animation)?
     if ([projectile numberOfRunningActions] > 0)
     {
+        // if so return without firing the projectile
         return;
     }
+    
+    // find the position of the ship
     CGPoint shipPosition = [ship position];
+    
+    // adjust the postion to start the projectile from the top of the ship
     shipPosition.y += [ship contentSize].height/2 + [projectile contentSize].height/2;
     
+    // set the position of the projectile sprite
     [projectile setPosition:shipPosition];
 
+    // create and end point for the projectile to travel to.
+    // we use the height of the window plus the ship postion to ensure the projectile travels off screen at a constant velocity
     CGPoint endPoint = CGPointMake(shipPosition.x, shipPosition.y + [[CCDirector sharedDirector] winSize].height);
     
+    // set the projectile to run the "MoveTo" action in 2 seconds
     [projectile runAction:[CCMoveTo actionWithDuration:2 position:endPoint]];
 }
 
-// will return the next projectile to fire for the ship
+// will return the next projectile to fire for the invader
 - (CCSprite *)getNextEnemyProjectile
 {
+    // Grab the next projectile in the array
     CCSprite *projectile = [allEnemyProjectiles objectAtIndex:enemyProjectileIndex];
     
+    // increment the projectile index
     enemyProjectileIndex++;
     if (enemyProjectileIndex == numberOfEnemyProjectiles)
     {
         enemyProjectileIndex = 0;
     }
     
+    // if the projectile has not been added to the layer, add it now
     if (![[self children] containsObject:projectile]) 
     {
         [self addChild:projectile];
@@ -542,12 +637,16 @@ int invaderYMoveDistance = 44;
     return projectile;
 }
 
+// each invader in the front line gets a chance to fire a projectile
 - (void)fireEnemyProjectile
-{
+{   
+    // for each invader in the front line
     for (CCSprite *bottomInvader in [self frontlineInvaders]) 
     {
+        // find a random number
         int random = rand() % 100000;
         
+        // if the random number is within tolerence fire the projectile
         if (random < (enemyFireProbability) * 100000)
         {                    
             [self fireEnemyProjectileFromInvader:bottomInvader];
@@ -555,26 +654,38 @@ int invaderYMoveDistance = 44;
     }
 }
 
+// fires a projectile from the invader
 - (void)fireEnemyProjectileFromInvader:(CCSprite *)invaderSprite
 {
+    // grab the next projectile sprite
     CCSprite *projectile = [self getNextEnemyProjectile];
     
+    // has this sprite already been fired (and has not yet completed it's animation)?
     if ([projectile numberOfRunningActions] > 0)
     {
         return;
     }
+    
+    // find the position of the invader
     CGPoint invaderPosition = [invaderSprite position];
+    
+    // adjust the postion to start the projectile from the bottom of the invader
     invaderPosition.y -= [invaderSprite contentSize].height/2 + [projectile contentSize].height/2;
     
+    // set the position of the projectile sprite
     [projectile setPosition:invaderPosition];
     
+    // create and end point for the projectile to travel to.
+    // we use the height of the window plus the ship postion to ensure the projectile travels off screen at a constant velocity
     CGPoint endPoint = CGPointMake(invaderPosition.x, invaderPosition.y - [[CCDirector sharedDirector] winSize].height);
     
+    // set the projectile to run the "MoveTo" action in 2 seconds
     [projectile runAction:[CCMoveTo actionWithDuration:3 position:endPoint]];
 }
 
 #pragma mark Touch Events
 
+// tell the CCLayer code that we want the “targeted” set of touch events rather than the “standard” set
 - (void)registerWithTouchDispatcher
 {
     CCDirector *director = [CCDirector sharedDirector];
@@ -586,18 +697,22 @@ int invaderYMoveDistance = 44;
 {
     CGRect shipRect = [ship boundingBox];
     
-    //Inflate rect
+    // Inflate rect
+    // Tyler, if we are doubleing the size of the rect lets not had code number =D
     shipRect.size.width += 120;
     shipRect.size.height += 120;
     shipRect.origin.x -= 60;
     shipRect.origin.y -= 60;
     
-    
+    // Convert the touch into node space
     CGPoint touchPoint = [self convertTouchToNodeSpace:touch];
     
+    // check to see if the touch is within the expanded ship rect
     if (CGRectContainsPoint(shipRect, touchPoint)) 
     {
+        //if so fire a projectile
         [self fireShipProjectile];
+        // and schedule a projectile to fire every subsequent second
         [self schedule:@selector(fireShipProjectile) interval:1];
         
         return YES;
@@ -606,21 +721,30 @@ int invaderYMoveDistance = 44;
     return NO;
 }
 
+// when the user stops touching the screen
 - (void)ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    // stop firing the projectile
     [self unschedule:@selector(fireShipProjectile)];
 }
 
+// when the touch is cancelled (however that happens)
 -(void)ccTouchCancelled:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    // stop firing the projectile
     [self unschedule:@selector(fireShipProjectile)];
 }
 
+// when an existing touch moves
 -(void)ccTouchMoved:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    // Convert the touch into node space
     CGPoint location = [self convertTouchToNodeSpace:touch];
-    location.y = 50;
     
+    // do not allow the ship to move in the Y direction
+    location.y = shipYPosition;
+    
+    // update the ship location.
     ship.position = location;        
 }
                                          
