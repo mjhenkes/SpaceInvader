@@ -6,7 +6,6 @@
 //  Copyright __MyCompanyName__ 2012. All rights reserved.
 //
 
-
 // Import the interfaces
 #import "HelloWorldLayer.h"
 
@@ -16,36 +15,39 @@
 #import "StartGameContoller.h"
 #import "EndGameController.h"
 
-//Ship Sprite
-CCSprite *ship;
 
-//Ship Projectiles
-NSMutableArray *allShipProjectiles;
-int shipProjectileIndex = 0;
-int numberOfShipProjectiles = 3;
-
-//Enemy Projectiles
-NSMutableArray *allEnemyProjectiles;
-int enemyProjectileIndex = 0;
-int numberOfEnemyProjectiles = 100;
-CGFloat enemyFireProbability = 0.01;
-
-// General
-int leftMargin = 32;
-int rightMargin;
-int shipYPosition = 50;
-
-// Invaders
-NSMutableArray *allInvaderColumns;
-int numberOfInvaderColumns = 10;
-int invaderOffset = 22;
-int invaderXMoveTimeInterval = 360;
-int invaderYMoveTimeInterval = 10;
-int invaderFrameCount = 0;
-CGPoint invaderVelocity;
-int invaderYMoveDistance = 44;
-
+// DCSI.1.interface
 @interface HelloWorldLayer ()
+{
+    //Ship Sprite
+    CCSprite *ship;
+    
+    //Ship Projectiles
+    NSMutableArray *allShipProjectiles;
+    int shipProjectileIndex;
+    int numberOfShipProjectiles;
+    
+    //Enemy Projectiles
+    NSMutableArray *allEnemyProjectiles;
+    int enemyProjectileIndex;
+    int numberOfEnemyProjectiles;
+    CGFloat enemyFireProbability;
+    
+    // General
+    int leftMargin;
+    int rightMargin;
+    int shipYPosition;
+    
+    // Invaders
+    NSMutableArray *allInvaderColumns;
+    int numberOfInvaderColumns;
+    int invaderOffset;
+    int invaderXMoveTimeInterval;
+    int invaderYMoveTimeInterval;
+    int invaderFrameCount;
+    CGPoint invaderVelocity;
+    int invaderYMoveDistance;
+}
 
 // initialize the enemy invaders
 - (void)initializeInvaders;
@@ -65,6 +67,42 @@ int invaderYMoveDistance = 44;
            withAnimation:(CCAnimation *)animation
              withXOffset:(NSInteger)xOffset
              withYOffset:(NSInteger)yOffset;
+
+// build projectiles
+- (void)initializeProjectiles;
+
+// create an array of invaders in the "front line" invaders that may fire a projectile
+- (NSMutableArray *)frontlineInvaders;
+
+// move invaders based on their calculated velocity
+- (void)moveAllInvaders;
+
+// determines the next direction for the invaders to move
+- (void)determineInvaderVelocity;
+
+// check two sprites to see if they intersect
+- (BOOL)checkCollisionOfSprite:(CCSprite *)sprite1 withSprite:(CCSprite *)sprite2;
+
+// check ship sprite aginst collidable objects
+- (void)checkShipCollision;
+
+// checks to see if the projectile has hit any invaders
+- (void)checkInvaderCollision;
+
+// will return the next projectile to fire for the ship
+- (CCSprite *)getNextShipProjectile;
+
+// fires a projectile from the ship
+- (void)fireShipProjectile;
+
+// will return the next projectile to fire for the invader
+- (CCSprite *)getNextEnemyProjectile;
+
+// each invader in the front line gets a chance to fire a projectile
+- (void)fireEnemyProjectile;
+
+// fires a projectile from the invader
+- (void)fireEnemyProjectileFromInvader:(CCSprite *)invaderSprite;
 
 @end
 
@@ -99,12 +137,13 @@ int invaderYMoveDistance = 44;
 	// Apple recommends to re-assign "self" with the "super's" return value
 	if ((self=[super init]))
     {
-        //srand(time(NULL));
+        // DCSI.1.initContents
+        //[self startGame];
+        [self initializeGame];
         
-        [self startGame];
-        
+        // DCSI.2
         //register for touch events
-        self.isTouchEnabled = YES;
+        //self.isTouchEnabled = YES;
 	}
 	return self;
 }
@@ -146,29 +185,53 @@ int invaderYMoveDistance = 44;
     exit(0);
 }
 
+// DCSI.1.initializeGame
 // initialize the sprites and position them correctly for the new game
 - (void)initializeGame
 {
     [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
     
+    //Ship Projectiles
+    shipProjectileIndex = 0;
+    numberOfShipProjectiles = 3;
+    
+    //Enemy Projectiles
+    enemyProjectileIndex = 0;
+    numberOfEnemyProjectiles = 100;
+    enemyFireProbability = 0.01;
+    
+    // General
+    leftMargin = 32;
+    rightMargin= [[CCDirector sharedDirector] winSize].width - leftMargin;
+    shipYPosition = 50;
+    
+    // Invaders
+    numberOfInvaderColumns = 10;
+    invaderOffset = 22;
+    invaderXMoveTimeInterval = 360;
+    invaderYMoveTimeInterval = 10;
+    invaderFrameCount = 0;
+    invaderVelocity = CGPointMake(0, 0);
+    invaderYMoveDistance = 44;
+    
+    // DCSI.1
     // setup ship
     [self initializeShip];
     
+    // DCSI.3
     // setup invaders
-    [self initializeInvaders];
+    //[self initializeInvaders];
     
+    // DCSI.4
     // setup projectiles
-    [self initializeProjectiles];
+    //[self initializeProjectiles];
     
-    // setup misc
-    rightMargin = [[CCDirector sharedDirector] winSize].width - leftMargin;
-    invaderFrameCount = 0;
-    invaderVelocity = CGPointMake(0, 0);
-    
+    // DCSI.3
     // schedule next frame to fire on each frame (approximately 60 times per second)
-    [self schedule:@selector(nextFrame:)];
+    //[self schedule:@selector(nextFrame:)];
 }
 
+// DCSI.1.initializeShip
 // initailize the ship
 - (void)initializeShip
 {
@@ -185,6 +248,7 @@ int invaderYMoveDistance = 44;
     [self addChild:ship];
 }
 
+// DCSI.3.initializeInvaders
 // initialize the enemy invaders
 - (void)initializeInvaders
 {
@@ -252,8 +316,7 @@ int invaderYMoveDistance = 44;
     }
 }
 
-
-
+// DCSI.3.getSpriteFramesForInvaders
 // get the frames for the enemy sprites
 - (void)getSpriteFramesForInvaders:(NSMutableArray *)invaderArray 
                               vics:(NSMutableArray *)vicArray 
@@ -274,6 +337,7 @@ int invaderYMoveDistance = 44;
     }
 }
 
+// DCSI.3.addEnemyToColumn
 // add and enemy to an invading column
 - (void)addEnemyToColumn:(NSMutableArray *)column
          withSpriteFrame:(CCSpriteFrame *)spriteFrame
@@ -298,6 +362,7 @@ int invaderYMoveDistance = 44;
     [column addObject:enemySprite];
 }
 
+// DCSI.4.initializeProjectiles
 // build projectiles
 - (void)initializeProjectiles
 {
@@ -335,6 +400,50 @@ int invaderYMoveDistance = 44;
 	[super dealloc];
 }
 
+// DCSI.3.nextFrame
+// Code to run for each frame executed
+- (void)nextFrame:(ccTime)dt 
+{    
+    //    if ([allInvaderColumns count] == 0) 
+    //    {   
+    //        [[CCDirector sharedDirector] pause];
+    //        [[CCDirector sharedDirector] popScene];
+    //        
+    //        // Create some menu items
+    //        CCMenuItemImage * menuItem1 = [CCMenuItemImage itemFromNormalImage:@"invaderPing1.png"
+    //                                                             selectedImage: @"invaderPing2.png"
+    //                                                                    target:self
+    //                                                                  selector:@selector(resetGame)];
+    //        
+    //        // Create a menu and add your menu items to it
+    //        CCMenu * myMenu = [CCMenu menuWithItems:menuItem1, nil];
+    //        
+    //        // Arrange the menu items vertically
+    //        [myMenu alignItemsVertically];
+    //        
+    //        // add the menu to your scene
+    //        [self addChild:myMenu];
+    //    }
+    
+    // DCSI.3
+    // move invaders
+    [self moveAllInvaders];
+    
+    // DCSI.4
+    // fire enemy projectiles
+    [self fireEnemyProjectile];
+    
+    // DCSI.5
+    // check for collisions
+    [self checkInvaderCollision];
+    
+    // DCSI.5
+    // check for collisions
+    [self checkShipCollision];
+}
+
+#pragma mark Invader Movement
+// DCSI.3.frontlineInvaders
 // create an array of invaders in the "front line" invaders that may fire a projectile
 - (NSMutableArray *)frontlineInvaders
 {
@@ -351,45 +460,7 @@ int invaderYMoveDistance = 44;
     return frontline;
 }
 
-// Code to run for each frame executed
-- (void)nextFrame:(ccTime)dt 
-{
-//    if ([allInvaderColumns count] == 0) 
-//    {   
-//        [[CCDirector sharedDirector] pause];
-//        [[CCDirector sharedDirector] popScene];
-//        
-//        // Create some menu items
-//        CCMenuItemImage * menuItem1 = [CCMenuItemImage itemFromNormalImage:@"invaderPing1.png"
-//                                                             selectedImage: @"invaderPing2.png"
-//                                                                    target:self
-//                                                                  selector:@selector(resetGame)];
-//        
-//        // Create a menu and add your menu items to it
-//        CCMenu * myMenu = [CCMenu menuWithItems:menuItem1, nil];
-//        
-//        // Arrange the menu items vertically
-//        [myMenu alignItemsVertically];
-//        
-//        // add the menu to your scene
-//        [self addChild:myMenu];
-//    }
-    
-    // move invaders
-    [self moveAllInvaders];
-    
-    // fire enemy projectiles
-    [self fireEnemyProjectile];
-    
-    // check for collisions
-    [self checkInvaderCollision];
-    
-    // check for collisions
-    [self checkShipCollision];
-}
-
-
-#pragma mark Invader Movement
+// DCSI.3.moveAllInvaders
 // move invaders based on their calculated velocity
 - (void)moveAllInvaders
 {
@@ -410,6 +481,7 @@ int invaderYMoveDistance = 44;
     }
 }
 
+// DCSI.3.determineInvaderVelocity
 // determines the next direction for the invaders to move
 - (void)determineInvaderVelocity
 {   
@@ -467,6 +539,7 @@ int invaderYMoveDistance = 44;
 }
 
 #pragma mark Collision Detection
+// DCSI.5.checkCollisionOfSprite
 // check two sprites to see if they intersect
 - (BOOL)checkCollisionOfSprite:(CCSprite *)sprite1 withSprite:(CCSprite *)sprite2
 {
@@ -481,6 +554,7 @@ int invaderYMoveDistance = 44;
     return collide;
 }
 
+// DCSI.5.checkShipCollision
 // check ship sprite aginst collidable objects
 - (void)checkShipCollision
 {
@@ -512,6 +586,7 @@ int invaderYMoveDistance = 44;
     }
 }
 
+// DCSI.5checkInvaderCollision
 // checks to see if the projectile has hit any invaders
 - (void)checkInvaderCollision
 {
@@ -560,7 +635,7 @@ int invaderYMoveDistance = 44;
 }
 
 #pragma mark Projectile Creation
-
+// DCSI.4.getNextShipProjectile
 // will return the next projectile to fire for the ship
 - (CCSprite *)getNextShipProjectile
 {
@@ -585,6 +660,7 @@ int invaderYMoveDistance = 44;
     return projectile;
 }
 
+// DCSI.4.fireShipProjectile
 // fires a projectile from the ship
 - (void)fireShipProjectile
 {
@@ -615,6 +691,7 @@ int invaderYMoveDistance = 44;
     [projectile runAction:[CCMoveTo actionWithDuration:2 position:endPoint]];
 }
 
+// DCSI.4.getNextEnemyProjectile
 // will return the next projectile to fire for the invader
 - (CCSprite *)getNextEnemyProjectile
 {
@@ -637,6 +714,7 @@ int invaderYMoveDistance = 44;
     return projectile;
 }
 
+// DCSI.4.fireEnemyProjectile
 // each invader in the front line gets a chance to fire a projectile
 - (void)fireEnemyProjectile
 {   
@@ -654,6 +732,7 @@ int invaderYMoveDistance = 44;
     }
 }
 
+// DCSI.4.fireEnemyProjectileFromInvader
 // fires a projectile from the invader
 - (void)fireEnemyProjectileFromInvader:(CCSprite *)invaderSprite
 {
@@ -685,13 +764,15 @@ int invaderYMoveDistance = 44;
 
 #pragma mark Touch Events
 
+// DCSI.2.registerWithTouchDispatcher
 // tell the CCLayer code that we want the “targeted” set of touch events rather than the “standard” set
 - (void)registerWithTouchDispatcher
 {
     CCDirector *director = [CCDirector sharedDirector];
 	[[director touchDispatcher] addTargetedDelegate:self priority:0 swallowsTouches:YES];
 }
-                    
+
+// DCSI.2.ccTouchBegan
 // when the user taps the screen, fire a missile and move the ship the correct direction
 - (BOOL)ccTouchBegan:(UITouch *)touch withEvent:(UIEvent *)event
 {
@@ -721,6 +802,7 @@ int invaderYMoveDistance = 44;
     return NO;
 }
 
+// DCSI.2.ccTouchEnded
 // when the user stops touching the screen
 - (void)ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event
 {
@@ -728,13 +810,15 @@ int invaderYMoveDistance = 44;
     [self unschedule:@selector(fireShipProjectile)];
 }
 
+// DCSI.2.ccTouchCancelled
 // when the touch is cancelled (however that happens)
 -(void)ccTouchCancelled:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    // stop firing the projectile
+    // stop firing the projectileß
     [self unschedule:@selector(fireShipProjectile)];
 }
 
+// DCSI.2.ccTouchMoved
 // when an existing touch moves
 -(void)ccTouchMoved:(UITouch *)touch withEvent:(UIEvent *)event
 {

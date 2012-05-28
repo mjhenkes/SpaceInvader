@@ -20,9 +20,6 @@
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene;
 
-// moves the invader in the correct direction
-//- (void)moveInvader:(CCSprite *)invader;
-
 // initialize the sprites and position them correctly for the new game
 - (void)initializeGame;
 
