@@ -138,7 +138,6 @@
 	if ((self=[super init]))
     {
         // DCSI1_initContents
-        //[self startGame];
         [self initializeGame];
         
         // DCSI2
@@ -146,24 +145,6 @@
         self.isTouchEnabled = YES;
 	}
 	return self;
-}
-
-// gives user option to start the game or initializes game directly if being reset
-- (void)startGame
-{
-    [self initializeGame];
-}
-
-// ends the game and terminates the app
-- (void)endGame
-{
-    while ([[CCDirector sharedDirector] runningScene]) 
-    {
-        [[CCDirector sharedDirector] popScene];
-    }
-    
-    [[[CCDirector sharedDirector] runningThread] release];
-    exit(0);
 }
 
 // DCSI1_initializeGame

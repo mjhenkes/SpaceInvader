@@ -46,12 +46,12 @@
 - (void)createMenu
 {    
     // Create some menu items
-    CCMenuItemImage * menuItem1 = [CCMenuItemImage itemFromNormalImage:@"retry_default.png"
+    CCMenuItemImage * menuItem1 = [CCMenuItemImage itemWithNormalImage:@"retry_default.png"
                                                          selectedImage:@"retry_selected.png"
                                                                 target:self
                                                               selector:@selector(retry)];
     
-    CCMenuItemImage * menuItem2 = [CCMenuItemImage itemFromNormalImage:@"quit_default.png"
+    CCMenuItemImage * menuItem2 = [CCMenuItemImage itemWithNormalImage:@"quit_default.png"
                                                          selectedImage:@"quit_selected.png"
                                                                 target:self
                                                               selector:@selector(endGame)];

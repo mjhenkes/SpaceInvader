@@ -23,13 +23,4 @@
 // initialize the sprites and position them correctly for the new game
 - (void)initializeGame;
 
-// resets the game
-- (void)resetGame;
-
-// gives user option to start the game or initializes game directly if being resetted
-- (void)startGame;
-
-// ends the game and terminates the app
-- (void)endGame;
-
 @end
