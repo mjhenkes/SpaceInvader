@@ -367,12 +367,6 @@
 // Code to run for each frame executed
 - (void)nextFrame:(ccTime)dt 
 {   
-    // check for game over scenario
-    if ([allInvaderColumns count] == 0) 
-    {   
-        [[CCDirector sharedDirector] pushScene:[MenuLayer sceneWithMenuType:menuTypeWin]];
-    }
-    
     // DCSI3
     // move invaders
     [self moveAllInvaders];
@@ -519,7 +513,8 @@
             // the ship has been destroyed and we remove it from the layer
             [self removeChild:ship cleanup:YES];
             ship = nil;
-                                
+                        
+            //DCSI6
             [[CCDirector sharedDirector] pushScene:[MenuLayer sceneWithMenuType:menuTypeLose]];
         }
     }
@@ -547,25 +542,34 @@
                     // if the projectile and the invaders rect intersect, we have hit the invader and can remove it
                     if ([self checkCollisionOfSprite:projectile withSprite:invader]) 
                     {
+                        // remove the projectile from the layer
+                        [self removeChild:projectile cleanup:YES];
+                        
+                        // and hide the projectile off the screen
+                        projectile.position = CGPointMake(-1, -1);
+                        
                         // remove the invader from the layer
                         [self removeChild:invader cleanup:YES];
                     
                         // remove the invader from the column
                         [[allInvaderColumns objectAtIndex:x] removeObject:invader];
                         
+                        invader = nil;
+                        
                         // if the column has been emptied of invaders, remove it aswell
                         if ([[allInvaderColumns objectAtIndex:x] count] == 0) 
                         {
                             [allInvaderColumns removeObjectAtIndex:x];
+                            
+                            //DCSI6
+                            // check for game over scenario
+                            if ([allInvaderColumns count] == 0) 
+                            {   
+                                [[CCDirector sharedDirector] pushScene:[MenuLayer sceneWithMenuType:menuTypeWin]];
+                            }
+                            
                             break;
-                        }
-                        
-                        invader = nil;
-                    
-                        // remove the projectile from the layer
-                        [self removeChild:projectile cleanup:YES];
-                        // and hide the projectile off the screen
-                        projectile.position = CGPointMake(-1, -1);
+                        } 
                     }
                 }
             }
