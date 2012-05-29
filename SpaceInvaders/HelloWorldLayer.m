@@ -384,27 +384,12 @@
 // DCSI3_nextFrame
 // Code to run for each frame executed
 - (void)nextFrame:(ccTime)dt 
-{    
-    //    if ([allInvaderColumns count] == 0) 
-    //    {   
-    //        [[CCDirector sharedDirector] pause];
-    //        [[CCDirector sharedDirector] popScene];
-    //        
-    //        // Create some menu items
-    //        CCMenuItemImage * menuItem1 = [CCMenuItemImage itemFromNormalImage:@"invaderPing1.png"
-    //                                                             selectedImage: @"invaderPing2.png"
-    //                                                                    target:self
-    //                                                                  selector:@selector(resetGame)];
-    //        
-    //        // Create a menu and add your menu items to it
-    //        CCMenu * myMenu = [CCMenu menuWithItems:menuItem1, nil];
-    //        
-    //        // Arrange the menu items vertically
-    //        [myMenu alignItemsVertically];
-    //        
-    //        // add the menu to your scene
-    //        [self addChild:myMenu];
-    //    }
+{   
+    // check for game over scenario
+    if ([allInvaderColumns count] == 0) 
+    {   
+        [[CCDirector sharedDirector] pushScene:[WinLayer scene]];
+    }
     
     // DCSI3
     // move invaders
