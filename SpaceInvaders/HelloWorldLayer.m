@@ -12,9 +12,7 @@
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
 
-#import "GameOverLayer.h"
-#import "WinLayer.h"
-
+#import "MenuLayer.h"
 
 // DCSI1_interface
 @interface HelloWorldLayer ()
@@ -159,7 +157,7 @@
     
     //Enemy Projectiles
     enemyProjectileIndex = 0;
-    numberOfEnemyProjectiles = 100;
+    numberOfEnemyProjectiles = 1000;
     enemyFireProbability = 0.01;
     
     // General
@@ -369,7 +367,7 @@
     // check for game over scenario
     if ([allInvaderColumns count] == 0) 
     {   
-        [[CCDirector sharedDirector] pushScene:[WinLayer scene]];
+        [[CCDirector sharedDirector] pushScene:[MenuLayer sceneWithMenuType:menuTypeWin]];
     }
     
     // DCSI3
@@ -519,7 +517,7 @@
             [self removeChild:ship cleanup:YES];
             ship = nil;
                                 
-            [[CCDirector sharedDirector] pushScene:[GameOverLayer scene]];
+            [[CCDirector sharedDirector] pushScene:[MenuLayer sceneWithMenuType:menuTypeLose]];
         }
     }
 }
