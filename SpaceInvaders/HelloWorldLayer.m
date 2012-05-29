@@ -12,8 +12,8 @@
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
 
-#import "StartGameContoller.h"
-#import "EndGameController.h"
+#import "GameOverLayer.h"
+#import "WinLayer.h"
 
 
 // DCSI1_interface
@@ -151,36 +151,17 @@
 // gives user option to start the game or initializes game directly if being reset
 - (void)startGame
 {
-    if (![[CCDirector sharedDirector] isPaused])
-    {
-        StartGameContoller *controller = [[StartGameContoller alloc] initWithNibName:@"StartGame" 
-                                                                              bundle:nil 
-                                                                            delegate:self];
-        
-        controller.modalPresentationStyle = UIModalPresentationFormSheet;
-        
-        [[CCDirector sharedDirector] presentModalViewController:controller animated:YES];
-    }
-    else 
-    {
-        // from replacing the scene during reset
-        [self initializeGame];
-    }
-}
-
-// resets the game
-- (void)resetGame
-{
-    [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
-    [[CCDirector sharedDirector] replaceScene:[HelloWorldLayer scene]];
-    [[CCDirector sharedDirector] resume];
+    [self initializeGame];
 }
 
 // ends the game and terminates the app
 - (void)endGame
 {
-    [[CCDirector sharedDirector] dismissModalViewControllerAnimated:YES];
-    [[CCDirector sharedDirector] popScene];
+    while ([[CCDirector sharedDirector] runningScene]) 
+    {
+        [[CCDirector sharedDirector] popScene];
+    }
+    
     [[[CCDirector sharedDirector] runningThread] release];
     exit(0);
 }
@@ -571,17 +552,8 @@
             // the ship has been destroyed and we remove it from the layer
             [self removeChild:ship cleanup:YES];
             ship = nil;
-        
-            // end game popup
-            [[CCDirector sharedDirector] pause];
-            
-            EndGameController *controller = [[EndGameController alloc] initWithNibName:@"EndGame" 
-                                                                                bundle:nil 
-                                                                              delegate:self];
-            
-            controller.modalPresentationStyle = UIModalPresentationFormSheet;
-            
-            [[CCDirector sharedDirector] presentModalViewController:controller animated:YES];
+                                
+            [[CCDirector sharedDirector] pushScene:[GameOverLayer scene]];
         }
     }
 }

@@ -9,7 +9,7 @@
 #import "cocos2d.h"
 
 #import "AppDelegate.h"
-#import "HelloWorldLayer.h"
+#import "IntroductionLayer.h"
 
 @implementation AppController
 
@@ -79,7 +79,7 @@
 
 	// and add the scene to the stack. The director will run it when it automatically when the view is displayed.
     
-	[director_ pushScene:[HelloWorldLayer scene]]; //Here is where we add the scene to the director.
+	[director_ pushScene:[IntroductionLayer scene]]; //Here is where we add the scene to the director.
 
 	return YES;
 }
