@@ -20,7 +20,4 @@
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene;
 
-// initialize the sprites and position them correctly for the new game
-- (void)initializeGame;
-
 @end

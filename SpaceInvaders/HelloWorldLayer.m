@@ -47,6 +47,9 @@
     int invaderYMoveDistance;
 }
 
+// initialize the sprites and position them correctly for the new game
+- (void)initializeGame;
+
 // initialize the enemy invaders
 - (void)initializeInvaders;
 
